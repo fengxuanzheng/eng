@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+    <context id="DB2Tables" targetRuntime="MyBatis3">
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/sip"
+                        userId="root"
+                        password="820606">
+        </jdbcConnection>
+
+        <javaTypeResolver >
+            <property name="forceBigDecimals" value="false" />
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="com.pojo" targetProject="HexiProject/src">
+            <property name="enableSubPackages" value="true" />
+            <property name="trimStrings" value="true" />
+        </javaModelGenerator>
+          <!-- 指定SQL的DAO的XML生成位置-->
+        <sqlMapGenerator targetPackage="com.dao"  targetProject="HexiProject/XML">
+            <property name="enableSubPackages" value="true" />
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.dao"  targetProject="HexiProject/src">
+            <property name="enableSubPackages" value="true" />
+        </javaClientGenerator>
+
+      
+        <table tableName="defectrecord" domainObjectName="DefectrecordNEW"></table>
+
+
+
+    </context>
+</generatorConfiguration>

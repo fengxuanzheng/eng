@@ -8,9 +8,9 @@
           <element id="module-output" name="HexiProject" />
         </element>
         <element id="directory" name="lib">
-          <element id="library" level="project" name="AllEnvironment" />
           <element id="library" level="application" name="Spring MVC-5.2.3.RELEASE" />
           <element id="library" level="application" name="Spring-5.2.3.RELEASE" />
+          <element id="library" level="application" name="AllEnvironment" />
         </element>
       </element>
     </root>

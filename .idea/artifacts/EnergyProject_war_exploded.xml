@@ -1,0 +1,79 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="EnergyProject:war exploded">
+    <output-path>$PROJECT_DIR$/EnergyProject/target/EnergyProject-1.0</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <exploded>true</exploded>
+        <module>EnergyProject</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="EnergyProject" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Maven: com.baomidou:mybatis-plus:3.4.3" />
+          <element id="library" level="project" name="Maven: com.baomidou:mybatis-plus-extension:3.4.3" />
+          <element id="library" level="project" name="Maven: com.baomidou:mybatis-plus-core:3.4.3" />
+          <element id="library" level="project" name="Maven: com.baomidou:mybatis-plus-annotation:3.4.3" />
+          <element id="library" level="project" name="Maven: com.github.jsqlparser:jsqlparser:4.0" />
+          <element id="library" level="project" name="Maven: org.mybatis:mybatis:3.5.7" />
+          <element id="library" level="project" name="Maven: org.mybatis:mybatis-spring:2.0.6" />
+          <element id="library" level="project" name="Maven: net.sf.ehcache:ehcache:2.10.9.2" />
+          <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.25" />
+          <element id="library" level="project" name="Maven: org.mybatis.caches:mybatis-ehcache:1.2.1" />
+          <element id="library" level="project" name="Maven: org.slf4j:slf4j-log4j12:1.7.30" />
+          <element id="library" level="project" name="Maven: log4j:log4j:1.2.17" />
+          <element id="library" level="project" name="Maven: com.alibaba:druid:1.1.22" />
+          <element id="library" level="project" name="Maven: mysql:mysql-connector-java:8.0.25" />
+          <element id="library" level="project" name="Maven: com.google.protobuf:protobuf-java:3.11.4" />
+          <element id="library" level="project" name="Maven: com.microsoft.sqlserver:mssql-jdbc:9.2.0.jre11" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-context:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-expression:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-core:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-jcl:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-web:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-webmvc:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-aop:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-beans:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-context-support:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-orm:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-jdbc:5.3.4" />
+          <element id="library" level="project" name="Maven: org.springframework:spring-tx:5.3.4" />
+          <element id="library" level="project" name="Maven: com.baomidou:mybatis-plus-generator:3.4.1" />
+          <element id="library" level="project" name="Maven: org.apache.velocity:velocity-engine-core:2.3" />
+          <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.11" />
+          <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.8.6" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.12.3" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.12.3" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.12.3" />
+          <element id="library" level="project" name="Maven: commons-fileupload:commons-fileupload:1.4" />
+          <element id="library" level="project" name="Maven: commons-io:commons-io:2.2" />
+          <element id="library" level="project" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-ehcache:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-cache:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-lang:1.7.1" />
+          <element id="library" level="project" name="Maven: net.sf.ehcache:ehcache-core:2.6.11" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-spring:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-core:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-crypto-hash:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-crypto-core:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-crypto-cipher:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-config-core:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-config-ogdl:1.7.1" />
+          <element id="library" level="project" name="Maven: commons-beanutils:commons-beanutils:1.9.4" />
+          <element id="library" level="project" name="Maven: commons-collections:commons-collections:3.2.2" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-event:1.7.1" />
+          <element id="library" level="project" name="Maven: org.apache.shiro:shiro-web:1.7.1" />
+          <element id="library" level="project" name="Maven: org.owasp.encoder:encoder:1.2.2" />
+        </element>
+      </element>
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/EnergyProject/target/EnergyProject-1.0/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="javaee-facet-resources" facet="EnergyProject/web/Web" />
+    </root>
+  </artifact>
+</component>

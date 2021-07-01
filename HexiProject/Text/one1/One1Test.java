@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 public class One1Test {
-    @Test
+    /*@Test
     public void test()
     {
-        OneTest oneTest = new OneTest();
+        one1.OneTest oneTest = new OneTest();
         oneTest.shiros(new HashMap<String,String>());
-    }
+    }*/
 
     @Test
     public void test2()
@@ -60,12 +60,12 @@ public class One1Test {
     @Test
     public void test4()
     {
-        Student student = new Student();
+        /*Student student = new Student();
         student.getpersonname();
         //student.mypriba();
         //student.mystyat();
         student.mydefer2();
-        Myinp.mystyat();
+        Myinp.mystyat();*/
     }
 
     @Test
@@ -86,14 +86,14 @@ public class One1Test {
     @Test
     public void test6()
     {
-        Person schol = new Schol();
+       /* Person schol = new Schol();
         //schol.personage();
         //schol.personfutername();
         Schol schol1 = new Schol();
         //schol1.personfutername();
         String names = schol1.names;
         System.out.println(names);
-
+*/
     }
 
     @Test

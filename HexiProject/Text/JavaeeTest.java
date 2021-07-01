@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class JavaeeTest {
@@ -53,6 +54,17 @@ public class JavaeeTest {
          }
          System.out.println("循环结束" + a);
          System.out.println("循环结束" + a);
+     }
+
+     @Test
+    public void test4()
+     {
+         ArrayList arrayList = new ArrayList();
+         arrayList.add("dffs");
+         arrayList.add(25);
+         System.out.println(arrayList);
+         arrayList.set(1,250);
+         System.out.println(arrayList);
      }
 
 

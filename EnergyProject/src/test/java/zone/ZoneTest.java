@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,12 +55,12 @@ public class ZoneTest {
     @Test
     public void test3() throws ParseException {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
-        stringObjectHashMap.put("starttime", new Date());
+       /* stringObjectHashMap.put("starttime", new Date());
         stringObjectHashMap.put("eid", 1);
         stringObjectHashMap.put("sizes", 1);
         stringObjectHashMap.put("addtime", 5);
         List<Zone> zoneList = zoneServer.getZoneListForMinute(stringObjectHashMap,1,2);
-        System.out.println(zoneList);
+        System.out.println(zoneList);*/
     }
 
     //*****************************************************************************************
@@ -83,13 +84,25 @@ public class ZoneTest {
         }
         System.out.println(searchZone);
     }
+    @Test
+    public void test6(){
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        stringObjectHashMap.put("starttime", LocalDateTime.of(2021,5,24,0,0,0));
+        stringObjectHashMap.put("eid", 26);
+        stringObjectHashMap.put("endTime",LocalDateTime.of(2021,5,25,0,0,0));
+        stringObjectHashMap.put("addtime", 1);
+        List<Zone> hours = zoneServer.getNodeZoneTotalData(stringObjectHashMap, "hours");
+        System.out.println(hours);
+    }
 
     //*******************************************************************************************
     //以下为自由测试
     @Test
     public void test5()
     {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().plusDays(-4);
+        Month month = now.getMonth();
+        System.out.println(month.maxLength());
         int year = now.getYear();
         int monthValue = now.getMonthValue();
         int dayOfMonth = now.getDayOfMonth();

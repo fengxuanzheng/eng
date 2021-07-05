@@ -119,7 +119,9 @@
              the lifecycleBeanProcessor has run:
         5. 启用 IOC 容器中使用 shiro 的注解. 但必须在配置了 LifecycleBeanPostProcessor 之后才可以使用.-->
     <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
-          depends-on="lifecycleBeanPostProcessor"/>
+          depends-on="lifecycleBeanPostProcessor">
+        <property name="proxyTargetClass" value="true"/> <!--此配置非常重要,如果使用CGLIB做AOP代理必须设置此设置,否则哪怕在在AOP设置了proxy-target-class="true"也没用,因为多层嵌套代理默认使用JDK的接口代理哪怕设置了CGLIB也会无效-->
+    </bean>
     <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor" >
         <property name="securityManager" ref="securityManager"/>
     </bean>

@@ -47,7 +47,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="AllEnvironment" level="application" />
+    <orderEntry type="library" name="AllEnvironment" level="project" />
     <orderEntry type="module-library" scope="TEST">
       <library name="JUnit5.7.0">
         <CLASSES>

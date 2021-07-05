@@ -20,6 +20,7 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,7 +49,7 @@ public class SseController
     @Autowired
     private DruidDataSource druidDataSource;
     private static LocalDateTime nextTime;
-    private HashMap<String, Zone> stringZoneHashMap = new HashMap<>();
+    private HashMap<String, Object> stringZoneHashMap = new HashMap<>();
    @RequestMapping(value = "/newsseemitter/{clientid}")
    public SseEmitter newgetSseEmitter(@PathVariable(value = "clientid",required = false) String id) throws IOException, InterruptedException, ExecutionException {
        Future<SseEmitter> submit = threadPoolTaskExecutor.submit(() -> {
@@ -107,6 +108,7 @@ public class SseController
     public void transferSqlserver(HttpServletResponse httpServletResponse)  {
        if (nextTime==null){
            sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,true);
+           sendTotalZoneData();
            nextTime=LocalDateTime.now().plusHours(1);
        }
        else {
@@ -114,6 +116,7 @@ public class SseController
            if (nowTime.isAfter(nextTime))
            {
                sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,true);
+               sendTotalZoneData();
                nextTime=nowTime.plusHours(1);
            }
        }
@@ -122,6 +125,7 @@ public class SseController
     @GetMapping("/refreshExecute")
     public void everyRefreshExecute(HttpServletResponse httpServletResponse)  {
         sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,false);
+        sendTotalZoneData();
     }
 
   /*  @GetMapping("/getlastdayData")
@@ -132,12 +136,25 @@ public class SseController
     }
 */
     @Scheduled(cron = "0 15 0 * * ?")
+   // @GetMapping("/gettotaldata")
     public void timeAutoTask()
     {
         LocalDateTime now = LocalDateTime.now().plusDays(-1);
         //Zone zone = zoneDAO.selectTotalZoneForDay(now.getDayOfMonth(), now.getMonthValue(), now.getYear());
-        Zone zone = zoneDAO.selectTotalZoneForDay(24, 5, 2021);
+        Zone zone = zoneServer.getselectTotalZoneForDay(24, 5, 2021,26);
+        Zone beforeYesterdayZone = zoneServer.getselectTotalZoneForDay(23, 5, 2021,26);
+        Zone beforeYesterdayZone2 = zoneServer.getselectTotalZoneForDay(22, 5, 2021,26);
+        int differenceData=zone.gettValue()-beforeYesterdayZone.gettValue();
+        int differenceData2=beforeYesterdayZone.gettValue()-beforeYesterdayZone2.gettValue();
+        Double percentage=(differenceData-differenceData2)/(differenceData2*1.0)*100;
+        NumberFormat compactNumberInstance = NumberFormat.getNumberInstance();
+        compactNumberInstance.setMaximumFractionDigits(2);
+
+        String stringPercentage = compactNumberInstance.format(percentage) + "%";
        stringZoneHashMap.put("dd",zone);
+       stringZoneHashMap.put("total",zone);
+       stringZoneHashMap.put("diff",differenceData);
+       stringZoneHashMap.put("percentage",stringPercentage);
         concurrentHashMap.forEach((key,value)->{
             try {
                 value.send(SseEmitter.event().id(Integer.toString(integerConcurrentHashMap.get(key))).data(stringZoneHashMap));
@@ -150,7 +167,34 @@ public class SseController
         });
     }
 
+    private void sendTotalZoneData()
+    {
+        LocalDateTime now = LocalDateTime.now().plusDays(-1);
+        //Zone zone = zoneDAO.selectTotalZoneForDay(now.getDayOfMonth(), now.getMonthValue(), now.getYear());
+        Zone zone = zoneServer.getselectTotalZoneForDay(24, 5, 2021,26);
+        Zone beforeYesterdayZone = zoneServer.getselectTotalZoneForDay(23, 5, 2021,26);
+        Zone beforeYesterdayZone2 = zoneServer.getselectTotalZoneForDay(22, 5, 2021,26);
+        int differenceData=zone.gettValue()-beforeYesterdayZone.gettValue();
+        int differenceData2=beforeYesterdayZone.gettValue()-beforeYesterdayZone2.gettValue();
+        Double percentage=(differenceData-differenceData2)/(differenceData2*1.0)*100;
+        NumberFormat compactNumberInstance = NumberFormat.getNumberInstance();
+        compactNumberInstance.setMaximumFractionDigits(2);
 
+        String stringPercentage = compactNumberInstance.format(percentage) + "%";
+        stringZoneHashMap.put("total",zone);
+        stringZoneHashMap.put("diff",differenceData);
+        stringZoneHashMap.put("percentage",stringPercentage);
+        concurrentHashMap.forEach((key,value)->{
+            try {
+                value.send(SseEmitter.event().id(Integer.toString(integerConcurrentHashMap.get(key))).data(stringZoneHashMap));
+            } catch (IOException e) {
+                e.printStackTrace();
+                value.complete();
+                concurrentHashMap.remove(key);
+                integerConcurrentHashMap.remove(key);
+            }
+        });
+    }
 
 }
 

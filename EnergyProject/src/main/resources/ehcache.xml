@@ -1,21 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:noNamespaceSchemaLocation="../config/ehcache.xsd">
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
  <!-- 磁盘保存路径 -->
- <diskStore path="D:\JAVA\ehcache" />
- 
- <defaultCache 
-   maxElementsInMemory="0"
-   maxElementsOnDisk="10000000"
-   eternal="false" 
+ <diskStore path="java.io.tmpdir" />
+
+ <defaultCache
+   maxElementsInMemory="100"
+   maxElementsOnDisk="0"
+   eternal="true"
    overflowToDisk="true" 
-   timeToIdleSeconds="120"
-   timeToLiveSeconds="120"
+   timeToIdleSeconds="1200"
+   timeToLiveSeconds="1200"
    diskPersistent="true"
    diskExpiryThreadIntervalSeconds="120"
    memoryStoreEvictionPolicy="LRU">
  </defaultCache>
 </ehcache>
+
+<!--<defaultCache eternal="false" maxElementsInMemory="1000"
+              overflowToDisk="false" diskPersistent="false" timeToIdleSeconds="0"
+              timeToLiveSeconds="600" memoryStoreEvictionPolicy="LRU" />
+
+<cache name="FunctionCache" eternal="false"
+       maxElementsInMemory="500" overflowToDisk="false" diskPersistent="false"
+       timeToIdleSeconds="3600" timeToLiveSeconds="3600"
+       memoryStoreEvictionPolicy="LRU">
+</cache>
+
+<cache name="RoleFunctionCache" eternal="false"
+       maxElementsInMemory="500" overflowToDisk="false" diskPersistent="false"
+       timeToIdleSeconds="3600" timeToLiveSeconds="3600"
+       memoryStoreEvictionPolicy="LRU">
+</cache>
+
+<cache name="ModelDefCache" eternal="false"
+       maxElementsInMemory="500" overflowToDisk="false" diskPersistent="false"
+       timeToIdleSeconds="3600" timeToLiveSeconds="3600"
+       memoryStoreEvictionPolicy="LRU">
+</cache>
+
+<cache name="SysNoConfigCache" eternal="false"
+       maxElementsInMemory="500" overflowToDisk="false" diskPersistent="false"
+       timeToIdleSeconds="3600" timeToLiveSeconds="3600"
+       memoryStoreEvictionPolicy="LRU">
+</cache>
+
+<cache name="MesProdTimeCache" eternal="false"
+       maxElementsInMemory="500" overflowToDisk="false" diskPersistent="false"
+       timeToIdleSeconds="3600" timeToLiveSeconds="3600"
+       memoryStoreEvictionPolicy="LRU">
+</cache>
+</ehcache>-->
+
  
 <!-- 
 属性说明：

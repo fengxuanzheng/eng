@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.ObjectInputFilter;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -56,4 +57,6 @@ public class Zone implements Serializable {
     public void settTime(LocalDateTime tTime) {
         this.tTime = tTime;
     }
+
+
 }

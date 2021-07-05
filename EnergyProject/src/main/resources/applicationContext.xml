@@ -43,6 +43,12 @@
         <property name="mapperLocations" value="classpath:com/EnergyProject/dao/*.xml"/>
 
     </bean>
+
+    <!--<bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <property name="dataSource" ref="comboPooledDataSource"/>
+        <property name="mapperLocations" value="classpath:com/EnergyProject/dao/*.xml"/>
+    </bean>-->
     <!--把每个DAO接口实现类加入到IOC容器-->
 
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" id="mapperScannerConfigurer">
@@ -59,8 +65,10 @@
     <bean  class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="dataSourceTransactionManager">
         <constructor-arg name="dataSource"  ref="comboPooledDataSource"/>
     </bean>
-    <tx:annotation-driven transaction-manager="dataSourceTransactionManager"/>
+    <tx:annotation-driven transaction-manager="dataSourceTransactionManager" proxy-target-class="true"/>
+   <!-- <aop:aspectj-autoproxy proxy-target-class="true"/>-->
 
+    <aop:aspectj-autoproxy proxy-target-class="true" expose-proxy="true" />
     <!--线程池设置-->
     <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor" id="poolTaskExecutor">
         <property name="corePoolSize" value="8"/>

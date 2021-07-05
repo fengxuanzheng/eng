@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.EnergyProject.dao.ZoneDAO">
-    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+
     <resultMap id="mapzone1" type="com.EnergyProject.pojo.Zone">
         <result property="tValue" column="t_value"/>
         <result property="tTime" column="t_time"/>
@@ -62,7 +62,7 @@
         <result property="tTime" column="t_time"/>
         <result property="eid" column="eid"/>
     </resultMap>
-    <select id="getzonelist" statementType="CALLABLE" useCache="false" resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+    <select id="getzonelist" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
         {
             call finallgetvaluediffonSSE(
                 #{starttime,mode=IN,jdbcType=TIMESTAMP},
@@ -74,7 +74,7 @@
         }
     </select>
 
-    <select id="getzonelistForDay" statementType="CALLABLE" useCache="false" resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+    <select id="getzonelistForDay" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
         {
             call finallgetvaluediffForDAYonSSE(
                 #{starttime,mode=IN,jdbcType=TIMESTAMP},
@@ -86,13 +86,35 @@
             }
     </select>
 
-    <select id="getzonelistForMinute" statementType="CALLABLE" useCache="false" resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+    <select id="getzonelistForMinuteForManger" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
         {
-            call finallgetvaluediffForMinute(
+            call finallgetvaluediffForMinuteonManger(
                 #{starttime,mode=IN,jdbcType=TIMESTAMP},
                 #{addtime,mode=IN,jdbcType=INTEGER},
                 #{eid,mode=IN,jdbcType=INTEGER},
-                #{sizes,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP},
+                #{nulltime,mode=OUT,jdbcType=TIMESTAMP}
+            )
+            }
+    </select>
+    <select id="getzonelistForManger" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+        {
+            call finallgetvaluediffonManger(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP},
+                #{nulltime,mode=OUT,jdbcType=TIMESTAMP}
+            )
+            }
+    </select>
+    <select id="getzonelistForDayForManger" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+        {
+            call finallgetvaluediffForDAYonManger(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP},
                 #{nulltime,mode=OUT,jdbcType=TIMESTAMP}
             )
             }
@@ -111,7 +133,5 @@
     <select id="selectTotalZone" resultType="com.EnergyProject.pojo.Zone">
         select TOP 1 eid,t_time,t_value from zone where eid=26 order by t_time DESC
     </select>
-    <select id="selectTotalZoneForDay" resultType="com.EnergyProject.pojo.Zone">
-        SELECT top 1  eid,t_time,t_value from zone where DAY(t_time)=#{day}  AND MONTH(t_time)=#{month} AND YEAR(t_time)=#{year}  and eid=26 ORDER BY t_time DESC
-    </select>
+
 </mapper>

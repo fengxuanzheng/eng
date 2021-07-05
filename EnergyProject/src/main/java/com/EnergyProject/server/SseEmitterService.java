@@ -1,6 +1,7 @@
 package com.EnergyProject.server;
 
 import com.EnergyProject.dao.ZoneDAO;
+import com.EnergyProject.dao.ZoneDAOForNoCallable;
 import com.EnergyProject.pojo.Zone;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ public class SseEmitterService {
     private ZoneDAO zoneDAO;
     @Autowired
     private ZoneServer zoneServer;
+
     private static Integer integer=0;
     private static Integer sqlservercount=0;
 
@@ -65,7 +68,7 @@ public class SseEmitterService {
     }
 
 
-  @Async
+  //@Async
   public void sqlservertransferDao(Map<String,SseEmitter> sseEmitterMap,Map<String,Integer> integerMap ,boolean global)  {
 
       if (sseEmitterMap.size() != 0 )
@@ -78,7 +81,7 @@ public class SseEmitterService {
                   integerMap.put(key, 1);
               }
           });
-          List<Zone> everyZoneData=zoneDAO.sqlserverSelectAllLastZone();
+          List<Zone> everyZoneData=zoneServer.getsqlserverSelectAllLastZone();
           stringListHashMap.put("every",everyZoneData);
           if (!ssesourceIdNumForZero.isEmpty())
           {
@@ -92,21 +95,21 @@ public class SseEmitterService {
               int year = now.getYear();
               int monthValue = now.getMonthValue();
               int dayOfMonth = now.getDayOfMonth();
-              LocalDateTime of = LocalDateTime.of(2021, 6,28, 0, 0, 0);
+              LocalDateTime of = LocalDateTime.of(2021, 5,25, 0, 0, 0);
               stringObjectHashMap.put("starttime", of);
               stringObjectHashMap.put("eid", 26);
               stringObjectHashMap.put("sizes", 1);
               stringObjectHashMap.put("addtime", 1);
               searchZone.addAll(zoneServer.getZoneTotal(stringObjectHashMap));
               HashMap<String, Object> stringObjectHashMapForDay = new HashMap<>();
-             // if (dayOfMonth!=1)
-             // {
-                  stringObjectHashMapForDay.put("starttime", LocalDateTime.of(2021, 6, 1, 0, 0, 0));
+              if (dayOfMonth!=1)
+              {
+                  stringObjectHashMapForDay.put("starttime", LocalDateTime.of(2021, 5, 1, 0, 0, 0));
                   stringObjectHashMapForDay.put("eid", 26);
                   stringObjectHashMapForDay.put("sizes", 2);
                   stringObjectHashMapForDay.put("addtime", 1);
                   searchZoneForDay.addAll(zoneServer.getZoneListForDay(stringObjectHashMapForDay, 3, 1));
-             // }
+              }
               stringListHashMap.put("hh",searchZone);
               stringListHashMap.put("dd",searchZoneForDay);
 
@@ -193,12 +196,31 @@ public class SseEmitterService {
                   });
               }
               everyZoneData.clear();
+
           }
+          //sendEvery(sseEmitterMap,integerMap);
           }
+      }
+
+      public void  sendEvery(Map<String,SseEmitter> sseEmitterMap,Map<String,Integer> integerMap)
+      {
+          List<Zone> everyZoneData=zoneServer.getsqlserverSelectAllLastZone();
+          stringListHashMap.put("every",everyZoneData);
+          sseEmitterMap.forEach((key,value)->{
+              try {
+                  value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(stringListHashMap, MediaType.APPLICATION_JSON));
+              } catch (IOException e) {
+                  e.printStackTrace();
+                  value.complete();
+                  sseEmitterMap.remove(key);
+                  integerMap.remove(key);
+              }
+          });
       }
 
 }
 
+/*
 class OutFrontSseData{
     private Integer evalue;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GTM+8")
@@ -236,3 +258,4 @@ class OutFrontSseData{
                 '}';
     }
 }
+*/

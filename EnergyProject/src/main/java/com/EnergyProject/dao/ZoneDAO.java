@@ -19,6 +19,8 @@ public interface ZoneDAO  {
     public List<List<Zone>> getzonelistForManger(Map<String,Object> intoZone);
     @SuppressWarnings("MybatisXMapperMethodInspection")
     public List<List<Zone>> getzonelistForDayForManger(Map<String,Object> intoZone);
+    public List<Zone> getzonelistForCUROS(Map<String,Object> intoZone);
+    public List<Zone> getzonelistForCUROSForDay(Map<String,Object> intoZone);
     public Zone sqlservertransfer(Integer eid);
     public List<Zone> sqlserverSelectAllLastZone();
     public Zone selectTotalZone();

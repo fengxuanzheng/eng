@@ -1,5 +1,6 @@
 package zone;
 
+import com.EnergyProject.dao.ZoneDAO;
 import com.EnergyProject.pojo.Zone;
 import com.EnergyProject.server.ZoneServer;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -22,6 +23,8 @@ import java.util.List;
 public class ZoneTest {
     @Autowired
     private ZoneServer zoneServer;
+    @Autowired
+    private ZoneDAO zoneDAO;
 
     private List<Zone> searchZone=new ArrayList<>();
 
@@ -87,12 +90,15 @@ public class ZoneTest {
     @Test
     public void test6(){
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
-        stringObjectHashMap.put("starttime", LocalDateTime.of(2021,5,24,0,0,0));
+        stringObjectHashMap.put("starttime", LocalDateTime.of(2021,6,27,0,0,0));
         stringObjectHashMap.put("eid", 26);
-        stringObjectHashMap.put("endTime",LocalDateTime.of(2021,5,25,0,0,0));
+       // stringObjectHashMap.put("endTime",LocalDateTime.of(2021,5,25,0,0,0));
         stringObjectHashMap.put("addtime", 1);
-        List<Zone> hours = zoneServer.getNodeZoneTotalData(stringObjectHashMap, "hours");
-        System.out.println(hours);
+        stringObjectHashMap.put("sizes",1);
+        List<Zone> lists = zoneDAO.getzonelistForDayForMangertest(stringObjectHashMap);
+        System.out.println(lists);
+        System.out.println(lists.get(0));
+        System.out.println(stringObjectHashMap);
     }
 
     //*******************************************************************************************

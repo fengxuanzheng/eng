@@ -315,4 +315,13 @@ public class ZoneServer {
         return retrunzone;
     }
 
+    public List<Zone> getzonelistForCUROS(Map<String,Object> intoParament)
+    {
+                return zoneDAO.getzonelistForCUROS(intoParament);
+    }
+    public List<Zone> getzonelistForCUROSForDay(Map<String,Object> intoParament)
+    {
+        return zoneDAO.getzonelistForCUROSForDay(intoParament);
+    }
+
 }

@@ -95,20 +95,20 @@ public class SseEmitterService {
               int year = now.getYear();
               int monthValue = now.getMonthValue();
               int dayOfMonth = now.getDayOfMonth();
-              LocalDateTime of = LocalDateTime.of(2021, 5,25, 0, 0, 0);
+              LocalDateTime of = LocalDateTime.of(year, 6,28, 0, 0, 0);
               stringObjectHashMap.put("starttime", of);
               stringObjectHashMap.put("eid", 26);
-              stringObjectHashMap.put("sizes", 1);
+              stringObjectHashMap.put("endTime", LocalDateTime.of(year, 6,28, 23, 58, 0));
               stringObjectHashMap.put("addtime", 1);
-              searchZone.addAll(zoneServer.getZoneTotal(stringObjectHashMap));
+              searchZone.addAll(zoneServer.getzonelistForCUROS(stringObjectHashMap));
               HashMap<String, Object> stringObjectHashMapForDay = new HashMap<>();
               if (dayOfMonth!=1)
               {
-                  stringObjectHashMapForDay.put("starttime", LocalDateTime.of(2021, 5, 1, 0, 0, 0));
+                  stringObjectHashMapForDay.put("starttime", LocalDateTime.of(year, 5, 1, 0, 0, 0));
                   stringObjectHashMapForDay.put("eid", 26);
-                  stringObjectHashMapForDay.put("sizes", 2);
+                  stringObjectHashMapForDay.put("endTime", LocalDateTime.of(year, 6,1, 0, 0, 0));
                   stringObjectHashMapForDay.put("addtime", 1);
-                  searchZoneForDay.addAll(zoneServer.getZoneListForDay(stringObjectHashMapForDay, 3, 1));
+                  searchZoneForDay.addAll(zoneServer.getzonelistForCUROSForDay(stringObjectHashMapForDay));
               }
               stringListHashMap.put("hh",searchZone);
               stringListHashMap.put("dd",searchZoneForDay);
@@ -156,9 +156,11 @@ public class SseEmitterService {
           }
           if ( isQuickEntry && global )
           {
+              ArrayList<Zone> zones = new ArrayList<>();
               Zone zone = zoneDAO.selectTotalZone();
+              zones.add(zone);
 
-              stringListHashMap.put("hh",zone);
+              stringListHashMap.put("hh",zones);
               stringListHashMap.remove("dd");
               if (!filterSseEmitter.isEmpty())
               {

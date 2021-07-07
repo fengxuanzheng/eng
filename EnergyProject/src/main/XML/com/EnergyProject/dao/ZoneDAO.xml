@@ -133,5 +133,24 @@
     <select id="selectTotalZone" resultType="com.EnergyProject.pojo.Zone">
         select TOP 1 eid,t_time,t_value from zone where eid=26 order by t_time DESC
     </select>
+    <select id="getzonelistForCUROS" statementType="CALLABLE"  resultMap="mapzone1">
+        {call finallgetvaluediffonCUROS (
+            #{starttime,mode=IN,jdbcType=TIMESTAMP},
+            #{addtime,mode=IN,jdbcType=INTEGER},
+             #{eid,mode=IN,jdbcType=INTEGER},
+            #{endTime,mode=IN,jdbcType=TIMESTAMP}
+            )
+            }
+    </select>
+    <select id="getzonelistForCUROSForDay" statementType="CALLABLE"  resultMap="mapzone1">
+        {
+         call finallgetvaluediffonCUROSFORDAY(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP}
+            )
+        }
+    </select>
 
 </mapper>

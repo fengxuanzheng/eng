@@ -109,7 +109,7 @@ public class SseController
        if (nextTime==null){
            sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,true);
            sendTotalZoneData();
-           nextTime=LocalDateTime.now().plusHours(1);
+           nextTime=LocalDateTime.now().plusSeconds(10);
        }
        else {
            LocalDateTime nowTime=LocalDateTime.now();
@@ -117,13 +117,14 @@ public class SseController
            {
                sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,true);
                sendTotalZoneData();
-               nextTime=nowTime.plusHours(1);
+               nextTime=nowTime.plusSeconds(10);
            }
        }
     }
 
     @GetMapping("/refreshExecute")
     public void everyRefreshExecute(HttpServletResponse httpServletResponse)  {
+        nextTime=LocalDateTime.now().plusSeconds(10);
         sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,false);
         sendTotalZoneData();
     }
@@ -140,10 +141,10 @@ public class SseController
     public void timeAutoTask()
     {
         LocalDateTime now = LocalDateTime.now().plusDays(-1);
-        //Zone zone = zoneDAO.selectTotalZoneForDay(now.getDayOfMonth(), now.getMonthValue(), now.getYear());
-        Zone zone = zoneServer.getselectTotalZoneForDay(24, 5, 2021,26);
-        Zone beforeYesterdayZone = zoneServer.getselectTotalZoneForDay(23, 5, 2021,26);
-        Zone beforeYesterdayZone2 = zoneServer.getselectTotalZoneForDay(22, 5, 2021,26);
+        Zone zone = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth(), now.getMonthValue(), now.getYear(),26);
+        //Zone zone = zoneServer.getselectTotalZoneForDay(24, 5, 2021,26);
+        Zone beforeYesterdayZone = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth()-1, now.getMonthValue(), now.getYear(),26);
+        Zone beforeYesterdayZone2 = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth()-2, now.getMonthValue(), now.getYear(),26);
         int differenceData=zone.gettValue()-beforeYesterdayZone.gettValue();
         int differenceData2=beforeYesterdayZone.gettValue()-beforeYesterdayZone2.gettValue();
         Double percentage=(differenceData-differenceData2)/(differenceData2*1.0)*100;
@@ -170,17 +171,35 @@ public class SseController
     private void sendTotalZoneData()
     {
         LocalDateTime now = LocalDateTime.now().plusDays(-1);
-        //Zone zone = zoneDAO.selectTotalZoneForDay(now.getDayOfMonth(), now.getMonthValue(), now.getYear());
-        Zone zone = zoneServer.getselectTotalZoneForDay(24, 5, 2021,26);
-        Zone beforeYesterdayZone = zoneServer.getselectTotalZoneForDay(23, 5, 2021,26);
-        Zone beforeYesterdayZone2 = zoneServer.getselectTotalZoneForDay(22, 5, 2021,26);
-        int differenceData=zone.gettValue()-beforeYesterdayZone.gettValue();
-        int differenceData2=beforeYesterdayZone.gettValue()-beforeYesterdayZone2.gettValue();
-        Double percentage=(differenceData-differenceData2)/(differenceData2*1.0)*100;
-        NumberFormat compactNumberInstance = NumberFormat.getNumberInstance();
-        compactNumberInstance.setMaximumFractionDigits(2);
+        //Zone zone = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth(), now.getMonthValue(), now.getYear(),26);
+        Zone zone = zoneServer.getselectTotalZoneForDay(27, 6, 2021,26);
+        Zone beforeYesterdayZone = zoneServer.getselectTotalZoneForDay(26, 6, now.getYear(),26);
+        Zone beforeYesterdayZone2 = zoneServer.getselectTotalZoneForDay(25, 6, now.getYear(),26);
+        int differenceData=0;
+        int differenceData2=0;
+        String stringPercentage=null;
+        if (zone!=null && beforeYesterdayZone!=null)
+        {
+             differenceData=zone.gettValue()-beforeYesterdayZone.gettValue();
+        }
+        else
+        {
+            differenceData=0;
+        }
+        if (beforeYesterdayZone2!=null)
+        {
+            differenceData2=beforeYesterdayZone.gettValue()-beforeYesterdayZone2.gettValue();
+            Double percentage=(differenceData-differenceData2)/(differenceData2*1.0)*100;
+            NumberFormat compactNumberInstance = NumberFormat.getNumberInstance();
+            compactNumberInstance.setMaximumFractionDigits(2);
 
-        String stringPercentage = compactNumberInstance.format(percentage) + "%";
+            stringPercentage= compactNumberInstance.format(percentage) + "%";
+        }
+        else
+        {
+            stringPercentage="0%";
+        }
+
         stringZoneHashMap.put("total",zone);
         stringZoneHashMap.put("diff",differenceData);
         stringZoneHashMap.put("percentage",stringPercentage);

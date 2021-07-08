@@ -1,23 +1,31 @@
 package com.EnergyProject.utils;
 
 import com.EnergyProject.dao.ZoneDAO;
+import com.EnergyProject.dao.ZoneDAOForEhcache;
 import com.EnergyProject.pojo.Zone;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-
+@Component
 public class SelectMode {
+  @Autowired
+  private  ZoneDAOForEhcache zoneDAOForEhcache;
+  @Autowired
+  private ZoneDAO zoneDAO;
 
-    public static List<List<Zone>> selectModeForZoneServer(String selectMode, ZoneDAO zoneDAO, Map<String,Object> intoParament){
+    public  List<Zone> selectModeForZoneServer(String selectMode, Map<String,Object> intoParament){
         switch (selectMode)
         {
             case "hours":
-               return zoneDAO.getzonelistForManger(intoParament);
+               return zoneDAO.getzonelistForCUROS(intoParament);
 
             case "days":
-                return zoneDAO.getzonelistForDayForManger(intoParament);
+                return zoneDAO.getzonelistForCUROSForDay(intoParament);
             default:
-                return zoneDAO.getzonelistForMinuteForManger(intoParament);
+                return zoneDAOForEhcache.selectDafultForMininunt(intoParament);
+
         }
     }
 }

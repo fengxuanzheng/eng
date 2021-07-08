@@ -3,6 +3,7 @@ package com.EnergyProject.server;
 import com.EnergyProject.dao.ZoneDAO;
 import com.EnergyProject.dao.ZoneDAOForEhcache;
 import com.EnergyProject.dao.ZoneDAOForNoCallable;
+import com.EnergyProject.pojo.ProAmount;
 import com.EnergyProject.pojo.Zone;
 
 import com.EnergyProject.utils.SelectMode;
@@ -10,6 +11,7 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,10 @@ public class ZoneServer {
     private ZoneDAOForNoCallable zoneDAOForNoCallable;
     @Autowired
     private ZoneDAOForEhcache zoneDAOForEhcache;
+    @Autowired
+    private ProAmountServer proAmountServer;
+    @Autowired
+    private SelectMode selectMode;
 
     public List<Zone> getZoneList(Map<String,Object> intoParament,Integer outloop,Integer interloop) throws ParseException
     {
@@ -248,7 +254,7 @@ public class ZoneServer {
     }
 
     public List<Zone> getNodeZoneTotalData(Map<String,Object> intoParament,String selectMode){
-            ArrayList<Zone> retrunzone = new ArrayList<>();
+          /*  ArrayList<Zone> retrunzone = new ArrayList<>();
             for (int i=0;i<24;i++)
             {
 
@@ -312,7 +318,8 @@ public class ZoneServer {
                     break;
                 }
             }
-        return retrunzone;
+        return retrunzone;*/
+        return null;
     }
 
     public List<Zone> getzonelistForCUROS(Map<String,Object> intoParament)
@@ -322,6 +329,122 @@ public class ZoneServer {
     public List<Zone> getzonelistForCUROSForDay(Map<String,Object> intoParament)
     {
         return zoneDAO.getzonelistForCUROSForDay(intoParament);
+    }
+    public void hoursAmount(Map<String,Object>sendData,Integer year,Integer monthValue,Integer dayOfMonth,Boolean isSelectOfHours, Integer node)
+    {
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        ArrayList<ProAmount> proAmounts = new ArrayList<>();
+        List<ProAmount> proAmountList=null;
+        stringObjectHashMap.put("starttime", LocalDateTime.of(year,6,27,0,0,0));
+        stringObjectHashMap.put("node", 5);
+        stringObjectHashMap.put("endTime", LocalDateTime.of(year,6,28,0,30,0));
+        stringObjectHashMap.put("addtime", 1);
+        if (isSelectOfHours)
+        {
+            proAmountList = proAmountServer.getProAmountList(stringObjectHashMap);
+        }
+        else
+        {
+            proAmountList = proAmountServer.getProAmountListForDay(stringObjectHashMap);
+        }
+
+        proAmountList.forEach(iteam->{
+            proAmounts.add(new ProAmount(iteam.getNode(),iteam.gettValue(),iteam.gettTime()));
+        });
+        for (int i=0;i<proAmounts.size()-1;i++)
+        {
+            proAmounts.get(i).settValue(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue());
+        }
+        proAmountList.remove(proAmountList.size()-1);
+        sendData.put("ha",proAmounts);
+    }
+
+    public void handlerDateOfAmount(Map<String,Object>sendData,Integer year,Integer monthValue,@Nullable Integer dayOfMonth,Boolean isTotal,String selectMode,@Nullable Integer eid)
+    {
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        ArrayList<Zone> selectData = new ArrayList<>();
+        if (isTotal)
+        {
+            List<Zone> zoneList = null;
+            List<Zone> zoneListNext=null;
+            try {
+                if ("hours".equals(selectMode))
+                {
+                    stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,dayOfMonth,0,0,0));
+                    stringObjectHashMap.put("eid", 26);
+                    stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue,dayOfMonth+1,0,30,0));
+                    stringObjectHashMap.put("addtime", 1);
+                    zoneList = this.selectMode.selectModeForZoneServer(selectMode,stringObjectHashMap);
+                    stringObjectHashMap.put("eid", 27);
+                    zoneListNext = this.selectMode.selectModeForZoneServer(selectMode,stringObjectHashMap);
+                    if (zoneList.size()!=zoneListNext.size())
+                    {
+                        throw new RuntimeException("两个总表查询个数不相等");
+                    }
+                }
+                else
+                {
+                    stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,1,0,0,0));
+                    stringObjectHashMap.put("eid", 26);
+                    stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue+1,1,0,30,0));
+                    stringObjectHashMap.put("addtime", 1);
+                    zoneList = this.selectMode.selectModeForZoneServer(selectMode,stringObjectHashMap);
+                    stringObjectHashMap.put("eid", 27);
+                    zoneListNext = this.selectMode.selectModeForZoneServer(selectMode,stringObjectHashMap);
+                    if (zoneList.size()!=zoneListNext.size())
+                    {
+                        throw new RuntimeException("两个总表查询个数不相等");
+                    }
+                }
+
+
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+            finally {
+                ArrayList<Zone> zones = new ArrayList<>();
+                for (int i=0;i<zoneList.size();i++)
+                {
+                    Zone zone = zoneList.get(i);
+                    Zone zoneNext = zoneListNext.get(i);
+                    selectData.add(new Zone(zone.getEid(),zone.gettValue()+zoneNext.gettValue(),zone.gettTime()));
+                }
+            }
+
+        }
+        else
+        {
+            if ("hours".equals(selectMode))
+            {
+                stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,dayOfMonth,0,0,0));
+                stringObjectHashMap.put("eid", eid);
+                stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue,dayOfMonth+1,0,30,0));
+                stringObjectHashMap.put("addtime", 1);
+                List<Zone> zones = this.selectMode.selectModeForZoneServer(selectMode, stringObjectHashMap);
+                selectData.addAll(zones);
+            }
+            else if ("days".equals(selectMode))
+            {
+                stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,1,0,0,0));
+                stringObjectHashMap.put("eid", eid);
+                stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue+1,1,0,30,0));
+                stringObjectHashMap.put("addtime", 1);
+                List<Zone> zones = this.selectMode.selectModeForZoneServer(selectMode, stringObjectHashMap);
+                selectData.addAll(zones);
+            }
+
+        }
+
+        List<Zone> zones = new LinkedList<>();
+        selectData.forEach(iteam->{
+            zones.add(new Zone(iteam.getEid(),iteam.gettValue(),iteam.gettTime()));
+        });
+        for (int i=0;i<zones.size()-1;i++)
+        {
+           zones.get(i).settValue(selectData.get(i+1).gettValue()-selectData.get(i).gettValue());
+        }
+        zones.remove(zones.size()-1);
+        sendData.put("main",zones);
     }
 
 }

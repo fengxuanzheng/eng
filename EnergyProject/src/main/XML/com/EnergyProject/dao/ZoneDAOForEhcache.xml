@@ -8,4 +8,7 @@
     <select id="getZoneAllNode" resultType="java.lang.Integer">
         select distinct eid from zone
     </select>
+    <select id="selectDafultForMininunt" resultType="com.EnergyProject.pojo.Zone">
+        select eid,t_value,t_time from zone where eid=#{eid} and t_time >= #{starttime} and t_time &lt; #{emdtime} ORDER BY t_time
+    </select>
 </mapper>

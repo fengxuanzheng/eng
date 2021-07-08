@@ -98,18 +98,17 @@ public class SseEmitterService {
               LocalDateTime of = LocalDateTime.of(year, 6,28, 0, 0, 0);
               stringObjectHashMap.put("starttime", of);
               stringObjectHashMap.put("eid", 26);
-              stringObjectHashMap.put("endTime", LocalDateTime.of(year, 6,28, 23, 58, 0));
+              stringObjectHashMap.put("endTime", LocalDateTime.of(year, 6,28, 23, 50, 0));
               stringObjectHashMap.put("addtime", 1);
               searchZone.addAll(zoneServer.getzonelistForCUROS(stringObjectHashMap));
               HashMap<String, Object> stringObjectHashMapForDay = new HashMap<>();
-              if (dayOfMonth!=1)
-              {
-                  stringObjectHashMapForDay.put("starttime", LocalDateTime.of(year, 5, 1, 0, 0, 0));
+
+                  stringObjectHashMapForDay.put("starttime", LocalDateTime.of(year, monthValue, 1, 0, 0, 0));
                   stringObjectHashMapForDay.put("eid", 26);
-                  stringObjectHashMapForDay.put("endTime", LocalDateTime.of(year, 6,1, 0, 0, 0));
+                  stringObjectHashMapForDay.put("endTime", LocalDateTime.of(year, monthValue+1,1, 0, 0, 0));
                   stringObjectHashMapForDay.put("addtime", 1);
                   searchZoneForDay.addAll(zoneServer.getzonelistForCUROSForDay(stringObjectHashMapForDay));
-              }
+
               stringListHashMap.put("hh",searchZone);
               stringListHashMap.put("dd",searchZoneForDay);
 

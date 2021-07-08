@@ -95,10 +95,10 @@ public class ZoneTest {
        // stringObjectHashMap.put("endTime",LocalDateTime.of(2021,5,25,0,0,0));
         stringObjectHashMap.put("addtime", 1);
         stringObjectHashMap.put("sizes",1);
-        List<Zone> lists = zoneDAO.getzonelistForDayForMangertest(stringObjectHashMap);
+        /*List<Zone> lists = zoneDAO.getzonelistForDayForMangertest(stringObjectHashMap);
         System.out.println(lists);
         System.out.println(lists.get(0));
-        System.out.println(stringObjectHashMap);
+        System.out.println(stringObjectHashMap);*/
     }
 
     //*******************************************************************************************

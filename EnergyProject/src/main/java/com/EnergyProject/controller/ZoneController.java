@@ -2,7 +2,9 @@ package com.EnergyProject.controller;
 
 import com.EnergyProject.dao.ZoneDAO;
 import com.EnergyProject.dao.ZoneDAOForNoCallable;
+import com.EnergyProject.pojo.ProAmount;
 import com.EnergyProject.pojo.Zone;
+import com.EnergyProject.server.ProAmountServer;
 import com.EnergyProject.server.ZoneServer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.runtime.directive.MacroParseException;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.ParameterizedType;
@@ -27,11 +30,13 @@ public class ZoneController {
     @Autowired
     private ZoneDAO zoneDAO;
     @Autowired
+    private ProAmountServer proAmountServer;
+    @Autowired
     private ZoneDAOForNoCallable zoneDAOForNoCallable;
     private Map<String,Object> frontEndData=new HashMap<>();
     private Map<String,Object> yesterdayFrontEndData=new HashMap<>();
-    @GetMapping("/getYesterdayData")
-    public Map<String, Object> getYesterdayData() throws ParseException {
+    /*@GetMapping("/getYesterdayData")
+    public Map<String, Object> getYesterdayData(@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmount) throws ParseException {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
             frontEndData.remove("init");
         LocalDateTime localDateTime = LocalDateTime.now().plusDays(-1);
@@ -45,14 +50,35 @@ public class ZoneController {
         List<Zone> zoneList = zoneServer.getzonelistForCUROS(stringObjectHashMap);
         frontEndData.put("main",zoneList);
 
-            stringObjectHashMap.put("starttime", LocalDateTime.of(year,6,28,0,0,0));
+            stringObjectHashMap.put("starttime", LocalDateTime.of(year,6, 28,0,0,0));
             stringObjectHashMap.put("endTime", LocalDateTime.of(year,6,28,0,30,0));
             List<Zone> zone = zoneServer.getzonelistForCUROS(stringObjectHashMap);
             frontEndData.put("init",zone);
+            if (isAmount)
+            {
+               zoneServer.hoursAmount(frontEndData,year,monthValue,dayOfMonth,true,5);
+            }
 
+        return frontEndData;
+    }*/
+
+    @GetMapping("/getYesterdayData")
+    public Map<String, Object> getYesterdayData(@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmount) throws ParseException {
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        LocalDateTime localDateTime = LocalDateTime.now().plusDays(-1);
+        int year = localDateTime.getYear();
+        int monthValue = localDateTime.getMonthValue();
+        int dayOfMonth = localDateTime.getDayOfMonth();
+        zoneServer.handlerDateOfAmount(frontEndData,year,6,27,true,"hours",null);
+        if (isAmount)
+        {
+            zoneServer.hoursAmount(frontEndData,year,6,27,true,5);
+        }
 
         return frontEndData;
     }
+
+
 
     @GetMapping("/getTesterdayDataForMonth")
     public Map<String, Object> getTesterdayDataForMonth() throws ParseException {
@@ -60,15 +86,17 @@ public class ZoneController {
         LocalDateTime localDateTime = LocalDateTime.now().plusMonths(-1);
         int year = localDateTime.getYear();
         int monthValue = localDateTime.getMonthValue();
+        Month month = localDateTime.getMonth();
+        int maxDay = month.maxLength();
         int dayOfMonth = localDateTime.getDayOfMonth();
-        stringObjectHashMap.put("starttime", LocalDateTime.of(year,4,1,0,0,0));
+        stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,dayOfMonth,0,0,0));
         stringObjectHashMap.put("eid", 26);
-        stringObjectHashMap.put("endTime", LocalDateTime.of(year,4,30,0,0,0));
+        stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue,maxDay,0,30,0));
         stringObjectHashMap.put("addtime", 1);
         List<Zone> zoneList = zoneServer.getzonelistForCUROSForDay(stringObjectHashMap);
         yesterdayFrontEndData.put("main",zoneList);
-        stringObjectHashMap.put("starttime", LocalDateTime.of(year,5,1,0,0,0));
-        stringObjectHashMap.put("endTime", LocalDateTime.of(year,5,1,23,0,0));
+        stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue+1,1,0,0,0));
+        stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue+1,1,23,0,0));
             List<Zone> zone = zoneServer.getzonelistForCUROSForDay(stringObjectHashMap);
             yesterdayFrontEndData.put("init",zone);
 

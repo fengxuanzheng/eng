@@ -9,5 +9,6 @@ public  interface ProAmountDAO {
 
     public  List<ProAmount> getProAmountList(Map<String, Object> inputParameter);
     public List<ProAmount> getProAmountListForDay(Map<String,Object> inputParameter);
+    public ProAmount getSingleProAmount(Integer eid);
 
 }

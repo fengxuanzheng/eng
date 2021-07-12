@@ -130,8 +130,8 @@
         SELECT zone.eid,zone.t_time,zone.t_value FROM [zone] RIGHT JOIN (SELECT eid, MAX(t_time) as lasttime FROM [zone] GROUP BY eid ) as lastzone on zone.eid=lastzone.eid
             and [zone].t_time=lastzone.lasttime
     </select>
-    <select id="selectTotalZone" resultType="com.EnergyProject.pojo.Zone">
-        select TOP 1 eid,t_time,t_value from zone where eid=26 order by t_time DESC
+    <select id="selectSingleZone" resultType="com.EnergyProject.pojo.Zone">
+        select TOP 1 eid,t_time,t_value from zone where eid=#{eid} order by t_time DESC
     </select>
     <select id="getzonelistForCUROS" statementType="CALLABLE"  resultMap="mapzone1">
         {call finallgetvaluediffonCUROS (

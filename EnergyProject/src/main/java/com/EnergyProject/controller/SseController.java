@@ -39,6 +39,10 @@ public class SseController
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private static ConcurrentHashMap<String,SseEmitter> concurrentHashMap=new ConcurrentHashMap<>();
     private static ConcurrentHashMap<String,Integer>integerConcurrentHashMap=new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String,String>modeConcurrentHashMap=new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String,String>selectModesConcurrentHashMap=new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String,Integer>noTotalForEidConcurrentHashMap=new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String,Integer>noTotalFornodeConcurrentHashMap=new ConcurrentHashMap<>();
     @Autowired
     private SseEmitterService sseEmitterService;
 
@@ -50,8 +54,8 @@ public class SseController
     private DruidDataSource druidDataSource;
     private static LocalDateTime nextTime;
     private HashMap<String, Object> stringZoneHashMap = new HashMap<>();
-   @RequestMapping(value = "/newsseemitter/{clientid}")
-   public SseEmitter newgetSseEmitter(@PathVariable(value = "clientid",required = false) String id) throws IOException, InterruptedException, ExecutionException {
+   @RequestMapping(value = "/newsseemitter/{clientid}/{mode}/{selectModes}")
+   public SseEmitter newgetSseEmitter(@PathVariable(value = "clientid",required = false) String id,@PathVariable(value = "mode",required = false) String mode,@PathVariable(value = "selectModes",required = false) String selectModes) throws IOException, InterruptedException, ExecutionException {
        Future<SseEmitter> submit = threadPoolTaskExecutor.submit(() -> {
            log.info("客户端开始连接");
            System.out.println(threadPoolTaskExecutor.getActiveCount());
@@ -76,6 +80,8 @@ public class SseController
 
                concurrentHashMap.put(id, sseEmitter);
                integerConcurrentHashMap.put(id,0);
+               modeConcurrentHashMap.put(id,mode);
+               selectModesConcurrentHashMap.put(id,selectModes);
                return sseEmitter;
            } else {
                return concurrentHashMap.get(id);
@@ -83,6 +89,16 @@ public class SseController
        });
        return submit.get();
 
+   }
+
+   @GetMapping("/getNototalEidOrNode")
+   public void getNototalEidOrNode(Integer eid,Integer node,String sseId)
+   {
+       noTotalForEidConcurrentHashMap.put(sseId,eid);
+       if (node!=null)
+       {
+           noTotalFornodeConcurrentHashMap.put(sseId,node);
+       }
    }
 
     @RequestMapping("/send/{clientid}")
@@ -98,16 +114,13 @@ public class SseController
     {
         log.warn("得到ID:"+id);
         System.out.println("调用关闭方法");
-        SseEmitter sseEmitter = concurrentHashMap.get(id);
-        sseEmitter.complete();
-        concurrentHashMap.remove(id);
-        integerConcurrentHashMap.remove(id);
+        sseEmitterService.closeSseEmitter(id,concurrentHashMap,integerConcurrentHashMap,modeConcurrentHashMap,selectModesConcurrentHashMap,noTotalForEidConcurrentHashMap,noTotalFornodeConcurrentHashMap);
     }
 
     @RequestMapping("/sqlserver")
     public void transferSqlserver(HttpServletResponse httpServletResponse)  {
        if (nextTime==null){
-           sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,true);
+           sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,modeConcurrentHashMap,selectModesConcurrentHashMap,noTotalForEidConcurrentHashMap,noTotalFornodeConcurrentHashMap,true);
            sendTotalZoneData();
            nextTime=LocalDateTime.now().plusHours(1);
        }
@@ -115,7 +128,7 @@ public class SseController
            LocalDateTime nowTime=LocalDateTime.now();
            if (nowTime.isAfter(nextTime))
            {
-               sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,true);
+               sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,modeConcurrentHashMap,selectModesConcurrentHashMap,noTotalForEidConcurrentHashMap,noTotalFornodeConcurrentHashMap,true);
                sendTotalZoneData();
                nextTime=nowTime.plusHours(1);
            }
@@ -125,7 +138,7 @@ public class SseController
     @GetMapping("/refreshExecute")
     public void everyRefreshExecute(HttpServletResponse httpServletResponse)  {
 
-        sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,false);
+        sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,modeConcurrentHashMap,selectModesConcurrentHashMap,noTotalForEidConcurrentHashMap,noTotalFornodeConcurrentHashMap,false);
         sendTotalZoneData();
     }
 
@@ -192,7 +205,7 @@ public class SseController
         {
             differenceData=0;
         }
-        if (beforeYesterdayZone2!=null)
+        if (beforeYesterdayZone2!=null && beforeYesterdayZone!=null)
         {
             differenceData2=beforeYesterdayZone.gettValue()-beforeYesterdayZone2.gettValue();
             Double percentage=(differenceData-differenceData2)/(differenceData2*1.0)*100;

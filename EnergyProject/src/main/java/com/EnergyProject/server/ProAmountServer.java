@@ -23,4 +23,8 @@ public class ProAmountServer {
     {
         return proAmountDAO.getProAmountListForDay(inputProgramer);
     }
+    public ProAmount getSingleProAmount(Integer node)
+    {
+       return proAmountDAO.getSingleProAmount(node);
+    }
 }

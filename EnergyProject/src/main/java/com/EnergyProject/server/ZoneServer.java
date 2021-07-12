@@ -322,6 +322,11 @@ public class ZoneServer {
         return null;
     }
 
+    public Zone getSelectSingleZone(Integer eid)
+    {
+       return zoneDAO.selectSingleZone(eid);
+    }
+
     public List<Zone> getzonelistForCUROS(Map<String,Object> intoParament)
     {
                 return zoneDAO.getzonelistForCUROS(intoParament);
@@ -330,23 +335,44 @@ public class ZoneServer {
     {
         return zoneDAO.getzonelistForCUROSForDay(intoParament);
     }
-    public void hoursAmount(Map<String,Object>sendData,Integer year,Integer monthValue,Integer dayOfMonth,Boolean isSelectOfHours, Integer node)
+    public void hoursAmount(Map<String,Object>sendData,Integer year,Integer monthValue,Integer dayOfMonth,Boolean isSelectOfHours,Boolean isTotal, @Nullable Integer node)
     {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         ArrayList<ProAmount> proAmounts = new ArrayList<>();
         List<ProAmount> proAmountList=null;
-        stringObjectHashMap.put("starttime", LocalDateTime.of(year,6,27,0,0,0));
-        stringObjectHashMap.put("node", 5);
-        stringObjectHashMap.put("endTime", LocalDateTime.of(year,6,28,0,30,0));
-        stringObjectHashMap.put("addtime", 1);
-        if (isSelectOfHours)
+        if (isTotal)
         {
-            proAmountList = proAmountServer.getProAmountList(stringObjectHashMap);
+            stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,dayOfMonth,0,0,0));
+            stringObjectHashMap.put("node", 5);
+            stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue,dayOfMonth+1,0,30,0));
+            stringObjectHashMap.put("addtime", 1);
+            if (isSelectOfHours)
+            {
+                proAmountList = proAmountServer.getProAmountList(stringObjectHashMap);
+            }
+            else
+            {
+                proAmountList = proAmountServer.getProAmountListForDay(stringObjectHashMap);
+            }
+
         }
         else
         {
-            proAmountList = proAmountServer.getProAmountListForDay(stringObjectHashMap);
+            stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,dayOfMonth,0,0,0));
+            stringObjectHashMap.put("node", node);
+            stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue,dayOfMonth+1,0,30,0));
+            stringObjectHashMap.put("addtime", 1);
+            if (isSelectOfHours)
+            {
+                proAmountList = proAmountServer.getProAmountList(stringObjectHashMap);
+            }
+            else
+            {
+                proAmountList = proAmountServer.getProAmountListForDay(stringObjectHashMap);
+            }
         }
+
+
 
         proAmountList.forEach(iteam->{
             proAmounts.add(new ProAmount(iteam.getNode(),iteam.gettValue(),iteam.gettTime()));
@@ -355,7 +381,7 @@ public class ZoneServer {
         {
             proAmounts.get(i).settValue(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue());
         }
-        proAmountList.remove(proAmountList.size()-1);
+        proAmounts.remove(proAmounts.size()-1);
         sendData.put("ha",proAmounts);
     }
 

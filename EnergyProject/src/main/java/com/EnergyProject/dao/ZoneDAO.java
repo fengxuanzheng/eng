@@ -23,7 +23,7 @@ public interface ZoneDAO  {
     public List<Zone> getzonelistForCUROSForDay(Map<String,Object> intoZone);
     public Zone sqlservertransfer(Integer eid);
     public List<Zone> sqlserverSelectAllLastZone();
-    public Zone selectTotalZone();
+    public Zone selectSingleZone(Integer eid);
 
 
 

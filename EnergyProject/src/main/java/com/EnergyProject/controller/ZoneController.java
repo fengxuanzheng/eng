@@ -63,7 +63,7 @@ public class ZoneController {
     }*/
 
     @GetMapping("/getYesterdayData")
-    public Map<String, Object> getYesterdayData(@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmount) throws ParseException {
+    public Map<String, Object> getYesterdayData(@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmount,@RequestParam(value = "isHours",defaultValue = "true") Boolean isHours) throws ParseException {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         LocalDateTime localDateTime = LocalDateTime.now().plusDays(-1);
         int year = localDateTime.getYear();
@@ -72,7 +72,23 @@ public class ZoneController {
         zoneServer.handlerDateOfAmount(frontEndData,year,6,27,true,"hours",null);
         if (isAmount)
         {
-            zoneServer.hoursAmount(frontEndData,year,6,27,true,5);
+            zoneServer.hoursAmount(frontEndData,year,6,27,true,true,5);
+        }
+
+        return frontEndData;
+    }
+
+    @GetMapping("/getNowDayData")
+    public Map<String,Object> getNowDayData(@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmount,@RequestParam(value = "isHours",defaultValue = "true") Boolean isHours)
+    {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        int year = localDateTime.getYear();
+        int monthValue = localDateTime.getMonthValue();
+        int dayOfMonth = localDateTime.getDayOfMonth();
+        zoneServer.handlerDateOfAmount(frontEndData,year,6,27,true,"hours",null);
+        if (isAmount)
+        {
+            zoneServer.hoursAmount(frontEndData,year,6,27,true,true,5);
         }
 
         return frontEndData;

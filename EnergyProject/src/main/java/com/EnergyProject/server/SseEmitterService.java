@@ -2,11 +2,14 @@ package com.EnergyProject.server;
 
 import com.EnergyProject.dao.ZoneDAO;
 import com.EnergyProject.dao.ZoneDAOForNoCallable;
+import com.EnergyProject.pojo.ProAmount;
 import com.EnergyProject.pojo.Zone;
+import com.EnergyProject.utils.SelectMode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -19,6 +22,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -30,6 +34,10 @@ public class SseEmitterService {
     private ZoneDAO zoneDAO;
     @Autowired
     private ZoneServer zoneServer;
+    @Autowired
+    private SelectMode selectMode;
+    @Autowired
+    private ProAmountServer proAmountServer;
 
     private static Integer integer=0;
     private static Integer sqlservercount=0;
@@ -44,6 +52,12 @@ public class SseEmitterService {
     private HashSet<String> sseEmitterKeySet=new HashSet<>();
     private HashMap<String, Object> stringListHashMap = new HashMap<>();
     private Boolean isQuickEntry=false;
+
+    private ArrayList<String> totalModeForHours = new ArrayList<>();
+    private ArrayList<String> totalModeForDays = new ArrayList<>();
+    private ArrayList<String> NoTotalModeForHours = new ArrayList<>();
+    private ArrayList<String> NoTotalModeForDays = new ArrayList<>();
+
 
     @Async
     public void sends(String id, ConcurrentHashMap<String,SseEmitter> concurrentHashMap)
@@ -63,17 +77,43 @@ public class SseEmitterService {
 
         } catch (IOException e) {
             e.printStackTrace();
-            sseEmitter.completeWithError(e);
-        }
+            sseEmitter.completeWithError(e); }
     }
 
 
-  //@Async
-  public void sqlservertransferDao(Map<String,SseEmitter> sseEmitterMap,Map<String,Integer> integerMap ,boolean global)  {
+  @Async
+  public void sqlservertransferDao(Map<String,SseEmitter> sseEmitterMap,Map<String,Integer> integerMap ,Map<String,String>modeMap,Map<String,String>selectModes,Map<String,Integer>noTotalForEid,Map<String,Integer> nototalForNode,boolean global)  {
+
+      modeMap.forEach((key,value)->{
+          if ("total".equals(value))
+          {
+              if ("hours".equals(selectModes.get(key)))
+              {
+                  totalModeForHours.add(key);
+              }
+              else
+              {
+                  totalModeForDays.add(key);
+              }
+          }
+          else
+          {
+              if ("hours".equals(selectModes.get(key)))
+              {
+                  NoTotalModeForHours.add(key);
+              }
+              else
+              {
+                  NoTotalModeForDays.add(key);
+              }
+          }
+      });
+
 
       if (sseEmitterMap.size() != 0 )
       {
-
+         final Map<String, Object> totalHours=new HashMap<>();
+         final Map<String, Object> totalDays=new HashMap<>();
           integerMap.forEach((key, value) -> {
               if (value == 0) {
                   ssesourceIdNumForZero.add(key);
@@ -85,6 +125,7 @@ public class SseEmitterService {
           stringListHashMap.put("every",everyZoneData);
           if (!ssesourceIdNumForZero.isEmpty())
           {
+              HashMap<String, Map<String, Object>> sendToSseemiter = new HashMap<>();
               Set<Map.Entry<String, SseEmitter>> entries = sseEmitterMap.entrySet();
               entries.forEach(value->{
                   sseEmitterKeySet.add(value.getKey());
@@ -92,10 +133,45 @@ public class SseEmitterService {
 
               HashMap<String, Object> stringObjectHashMap = new HashMap<>();
               LocalDateTime now = LocalDateTime.now();
+              //int year = now.getYear();
+              //int monthValue = now.getMonthValue();
+              //int dayOfMonth = now.getDayOfMonth();
+
               int year = now.getYear();
-              int monthValue = now.getMonthValue();
-              int dayOfMonth = now.getDayOfMonth();
-              LocalDateTime of = LocalDateTime.of(year, 6,28, 0, 0, 0);
+              int monthValue = 6;
+              int dayOfMonth = 28;
+              ssesourceIdNumForZero.forEach(iteam->{
+                  if (totalModeForHours.contains(iteam))
+                  {
+                      if (totalHours.isEmpty())
+                      {
+                          totalHours.putAll(selectDataOfSseOnMode(year, monthValue, dayOfMonth, true, "hours", null, null, false));
+                      }
+                      sendToSseemiter.put(iteam,totalHours);
+                  }
+                  else if (totalModeForDays.contains(iteam))
+                  {
+                      if (totalDays.isEmpty())
+                      {
+                          totalDays.putAll(selectDataOfSseOnMode(year, monthValue, dayOfMonth, true, "days", null, null, false));
+                      }
+
+                      sendToSseemiter.put(iteam,totalDays);
+                  }
+                  else if (NoTotalModeForHours.contains(iteam))
+                  {
+                      Map<String, Object> hours = selectDataOfSseOnMode(year, monthValue, dayOfMonth, false, "hours", noTotalForEid.get(iteam), null, false);
+                      sendToSseemiter.put(iteam,hours);
+
+                  }
+                  else if (NoTotalModeForDays.contains(iteam))
+                  {
+                      Map<String, Object> hours = selectDataOfSseOnMode(year, monthValue, dayOfMonth, false, "days", noTotalForEid.get(iteam), null, false);
+                      sendToSseemiter.put(iteam,hours);
+                  }
+              });
+
+              /*LocalDateTime of = LocalDateTime.of(year, 6,28, 0, 0, 0);
               stringObjectHashMap.put("starttime", of);
               stringObjectHashMap.put("eid", 26);
               stringObjectHashMap.put("endTime", LocalDateTime.of(year, 6,28, 23, 50, 0));
@@ -110,22 +186,32 @@ public class SseEmitterService {
                   searchZoneForDay.addAll(zoneServer.getzonelistForCUROSForDay(stringObjectHashMapForDay));
 
               stringListHashMap.put("hh",searchZone);
-              stringListHashMap.put("dd",searchZoneForDay);
+              stringListHashMap.put("dd",searchZoneForDay);*/
 
               Iterator<String> iterator = ssesourceIdNumForZero.iterator();
               String next="";
               while (iterator.hasNext()){
                   try {
                        next = iterator.next();
-                      sseEmitterMap.get(next).send(SseEmitter.event().id(Integer.toString(integerMap.get(next))).data(stringListHashMap));
+                      sseEmitterMap.get(next).send(SseEmitter.event().id(Integer.toString(integerMap.get(next))).data(sendToSseemiter.get(next)));
                       integerMap.put(next,integerMap.get(next)+1);
 
                   }
                   catch (IOException e) {
                       e.printStackTrace();
                       sseEmitterMap.get(next).complete();
-                      integerMap.remove(next);
                       sseEmitterMap.remove(next);
+                      integerMap.remove(next);
+                      totalModeForDays.remove(next);
+                      totalModeForHours.remove(next);
+                      NoTotalModeForDays.remove(next);
+                      NoTotalModeForHours.remove(next);
+
+                      modeMap.remove(next);
+                      selectModes.remove(next);
+                      noTotalForEid.remove(next);
+                      nototalForNode.remove(next);
+
                   }
                   finally {
                       sseEmitterKeySet.remove(next);
@@ -133,8 +219,8 @@ public class SseEmitterService {
                   }
 
               }
-              searchZone.clear();
-              searchZoneForDay.clear();
+             /* searchZone.clear();
+              searchZoneForDay.clear();*/
 
               if (sseEmitterKeySet.size()!=0)
               {
@@ -155,19 +241,48 @@ public class SseEmitterService {
           }
           if ( isQuickEntry && global )
           {
-              ArrayList<Zone> zones = new ArrayList<>();
-              Zone zone = zoneDAO.selectTotalZone();
-              zones.add(zone);
+              HashMap<String, Object> storageTotalMode = new HashMap<>();
 
-              stringListHashMap.put("hh",zones);
-              stringListHashMap.remove("dd");
+              HashMap<String, Map<String, Object>> sendToSseemiter = new HashMap<>();
+              if (totalModeForHours.size()!=0)
+              {
+                  Zone selectSingleZoneForT3 = zoneServer.getSelectSingleZone(26);
+                  Zone selectSingleZoneForT4 = zoneServer.getSelectSingleZone(27);
+                  Zone totalZone = new Zone(selectSingleZoneForT3.getEid(), selectSingleZoneForT3.gettValue() + selectSingleZoneForT4.gettValue(), selectSingleZoneForT3.gettTime());
+                  ProAmount singleProAmount = proAmountServer.getSingleProAmount(5);
+                  storageTotalMode.put("T3",selectSingleZoneForT3);
+                  storageTotalMode.put("T4",selectSingleZoneForT4);
+                  storageTotalMode.put("total",totalZone);
+                  storageTotalMode.put("amount",singleProAmount);
+                  totalModeForHours.forEach(value->{
+                      sendToSseemiter.put(value,storageTotalMode);
+                  });
+              }
+               if (NoTotalModeForHours.size()!=0)
+              {
+                  NoTotalModeForHours.forEach(value->{
+                      Zone selectSingleZone = zoneServer.getSelectSingleZone(noTotalForEid.get(value));
+                      ArrayList<Zone> zones = new ArrayList<>(1);
+                      HashMap<String, Object> storageNoTatalMode = new HashMap<>();
+                      zones.add(selectSingleZone);
+                      storageNoTatalMode.put("single",zones);
+                      sendToSseemiter.put(value,storageNoTatalMode);
+
+                  });
+              }
+
+              //Zone zone = zoneDAO.selectTotalZone();
+              //zones.add(zone);
+
+              //stringListHashMap.put("hh",zones);
+              //stringListHashMap.remove("dd");
               if (!filterSseEmitter.isEmpty())
               {
                   sseEmitterMap.forEach((key, value) -> {
                       try {
                           if (!filterSseEmitter.contains(key))
                           {
-                              value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(stringListHashMap, MediaType.APPLICATION_JSON));
+                              value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(sendToSseemiter.get(value), MediaType.APPLICATION_JSON));
                               integerMap.put(key,integerMap.get(key)+1);
                           }
 
@@ -177,6 +292,15 @@ public class SseEmitterService {
                           log.info(e.getMessage());
                           value.complete();
                           sseEmitterMap.remove(key);
+                          integerMap.remove(key);
+                          totalModeForDays.remove(key);
+                          totalModeForHours.remove(key);
+                          NoTotalModeForDays.remove(key);
+                          NoTotalModeForHours.remove(key);
+                          modeMap.remove(key);
+                          selectModes.remove(key);
+                          noTotalForEid.remove(key);
+                          nototalForNode.remove(key);
                       }
                   });
                   filterSseEmitter.clear();
@@ -185,7 +309,7 @@ public class SseEmitterService {
               {
                   sseEmitterMap.forEach((key, value) -> {
                       try {
-                          value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(stringListHashMap, MediaType.APPLICATION_JSON));
+                          value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(sendToSseemiter.get(value), MediaType.APPLICATION_JSON));
                           integerMap.put(key,integerMap.get(key)+1);
 
                       } catch (IOException e) {
@@ -193,6 +317,15 @@ public class SseEmitterService {
                           log.info(e.getMessage());
                           value.complete();
                           sseEmitterMap.remove(key);
+                          integerMap.remove(key);
+                          totalModeForDays.remove(key);
+                          totalModeForHours.remove(key);
+                          NoTotalModeForDays.remove(key);
+                          NoTotalModeForHours.remove(key);
+                          modeMap.remove(key);
+                          selectModes.remove(key);
+                          noTotalForEid.remove(key);
+                          nototalForNode.remove(key);
                       }
                   });
               }
@@ -218,45 +351,118 @@ public class SseEmitterService {
               }
           });
       }
+      public void closeSseEmitter(String id,Map<String,SseEmitter> sseEmitterMap,Map<String,Integer> integerMap ,Map<String,String>modeMap,Map<String,String>selectModes,Map<String,Integer>noTotalForEid,Map<String,Integer> nototalForNode)
+      {
+          SseEmitter sseEmitter = sseEmitterMap.get(id);
+          sseEmitter.complete();
+          sseEmitterMap.remove(id);
+          integerMap.remove(id);
+          modeMap.remove(id);
+          selectModes.remove(id);
+          noTotalForEid.remove(id);
+          nototalForNode.remove(id);
+          totalModeForDays.remove(id);
+          totalModeForHours.remove(id);
+          NoTotalModeForDays.remove(id);
+          NoTotalModeForHours.remove(id);
+
+      }
+      public Map<String,Object>selectDataOfSseOnMode(Integer year,Integer monthValue,Integer dayOfMonth,Boolean isTotalMode,String selectMode,@Nullable Integer eid,@Nullable Integer node,@Nullable Boolean isSelectAmount)
+      {
+          HashMap<String, Object> outputData = new HashMap<>();
+          HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+          List<ProAmount> proAmounts = null;
+          List<Zone> zoneForT3=null;
+          List<Zone> zonesForT4=null;
+          List<Zone> totalZones=new ArrayList<>();
+          List<Zone> selectSingleZones=null;
+          if (isTotalMode)
+          {
+              if ("hours".equals(selectMode))
+              {
+                  stringObjectHashMap.put("starttime", LocalDateTime.of(year, monthValue,dayOfMonth, 0, 0, 0));
+                  stringObjectHashMap.put("eid", 26);
+                  stringObjectHashMap.put("endTime", LocalDateTime.of(year, monthValue,dayOfMonth+1, 0, 0, 0));
+                  stringObjectHashMap.put("addtime", 1);
+                  zoneForT3= this.selectMode.selectModeForZoneServer(selectMode, stringObjectHashMap);
+                  stringObjectHashMap.put("eid",27);
+                  zonesForT4 = this.selectMode.selectModeForZoneServer(selectMode, stringObjectHashMap);
+              }
+              else
+              {
+                  stringObjectHashMap.put("starttime", LocalDateTime.of(year, monthValue,1, 0, 0, 0));
+                  stringObjectHashMap.put("eid", 26);
+                  stringObjectHashMap.put("endTime", LocalDateTime.of(year, monthValue+1,1, 0, 0, 0));
+                  stringObjectHashMap.put("addtime", 1);
+                  zoneForT3= this.selectMode.selectModeForZoneServer(selectMode, stringObjectHashMap);
+                  stringObjectHashMap.put("eid",27);
+                  zonesForT4 = this.selectMode.selectModeForZoneServer(selectMode, stringObjectHashMap);
+              }
+
+               if (zoneForT3.size()!=zonesForT4.size())
+               {
+                   throw new RuntimeException("T3和T4集合大小不一");
+               }
+               for (int i=0;i<zoneForT3.size();i++)
+               {
+                   Zone zoneT3 = zoneForT3.get(i);
+                   Zone zoneT4= zonesForT4.get(i);
+                   totalZones.add(new Zone(zoneT3.getEid(),zoneT3.gettValue()+zoneT4.gettValue(),zoneT3.gettTime()));
+               }
+              stringObjectHashMap.put("node",5);
+              if ("hours".equals(selectMode))
+              {
+                  proAmounts= proAmountServer.getProAmountList(stringObjectHashMap);
+              }
+              else
+              {
+                  proAmounts = proAmountServer.getProAmountListForDay(stringObjectHashMap);
+              }
+
+              outputData.put("T3",zoneForT3);
+              outputData.put("T4",zonesForT4);
+              outputData.put("total",totalZones);
+              outputData.put("amount",proAmounts);
+
+          }
+          else
+          {
+              if ("hours".equals(selectMode))
+              {
+                  stringObjectHashMap.put("starttime", LocalDateTime.of(year, monthValue,dayOfMonth, 0, 0, 0));
+                  stringObjectHashMap.put("eid", eid);
+                  stringObjectHashMap.put("endTime", LocalDateTime.of(year, monthValue,dayOfMonth+1, 0, 0, 0));
+                  stringObjectHashMap.put("addtime", 1);
+                  selectSingleZones = this.selectMode.selectModeForZoneServer(selectMode, stringObjectHashMap);
+              }
+              else
+              {
+                  stringObjectHashMap.put("starttime", LocalDateTime.of(year, monthValue,1, 0, 0, 0));
+                  stringObjectHashMap.put("eid", eid);
+                  stringObjectHashMap.put("endTime", LocalDateTime.of(year, monthValue+1,1 , 0, 0));
+                  stringObjectHashMap.put("addtime", 1);
+                  selectSingleZones = this.selectMode.selectModeForZoneServer(selectMode, stringObjectHashMap);
+              }
+
+              outputData.put("single",selectSingleZones);
+              if (isSelectAmount)
+              {
+                  stringObjectHashMap.put("node",node);
+                  if ("hours".equals(selectMode))
+                  {
+                      proAmounts= proAmountServer.getProAmountList(stringObjectHashMap);
+                  }
+                  else
+                  {
+                      proAmounts = proAmountServer.getProAmountListForDay(stringObjectHashMap);
+                  }
+                  outputData.put("singleAmount",proAmounts);
+              }
+
+          }
+
+          return outputData;
+      }
+
 
 }
-
-/*
-class OutFrontSseData{
-    private Integer evalue;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GTM+8")
-    private LocalDateTime nowDateTime;
-
-    public OutFrontSseData(Integer evalue, LocalDateTime nowDateTime) {
-        this.evalue = evalue;
-        this.nowDateTime = nowDateTime;
-    }
-
-    public OutFrontSseData() {
-    }
-
-    public Integer getEvalue() {
-        return evalue;
-    }
-
-    public void setEvalue(Integer evalue) {
-        this.evalue = evalue;
-    }
-
-    public LocalDateTime getNowDateTime() {
-        return nowDateTime;
-    }
-
-    public void setNowDateTime(LocalDateTime nowDateTime) {
-        this.nowDateTime = nowDateTime;
-    }
-
-    @Override
-    public String toString() {
-        return "OutFrontSseData{" +
-                "evalue=" + evalue +
-                ", nowDateTime=" + nowDateTime +
-                '}';
-    }
-}
-*/

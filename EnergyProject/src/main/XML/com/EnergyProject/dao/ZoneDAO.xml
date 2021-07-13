@@ -152,5 +152,8 @@
             )
         }
     </select>
+    <select id="selectTotalZone" resultType="com.EnergyProject.pojo.Zone">
+        select Top 2 eid,t_time,t_value from zone where eid in(26,27) order by t_time desc
+    </select>
 
 </mapper>

@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -92,12 +93,20 @@ public class SseController
    }
 
    @GetMapping("/getNototalEidOrNode")
-   public void getNototalEidOrNode(Integer eid,Integer node,String sseId)
+   public Boolean getNototalEidOrNode(Integer eid,Integer node,String sseId)
    {
-       noTotalForEidConcurrentHashMap.put(sseId,eid);
+       Integer put = noTotalForEidConcurrentHashMap.put(sseId, eid);
        if (node!=null)
        {
            noTotalFornodeConcurrentHashMap.put(sseId,node);
+       }
+       if (put !=null)
+       {
+           return true;
+       }
+       else
+       {
+           return false;
        }
    }
 
@@ -139,61 +148,33 @@ public class SseController
     public void everyRefreshExecute(HttpServletResponse httpServletResponse)  {
 
         sseEmitterService.sqlservertransferDao(concurrentHashMap,integerConcurrentHashMap,modeConcurrentHashMap,selectModesConcurrentHashMap,noTotalForEidConcurrentHashMap,noTotalFornodeConcurrentHashMap,false);
-        sendTotalZoneData();
+
     }
 
 
     @Scheduled(cron = "0 15 0 * * ?")
     //@GetMapping("/gettotaldata")
     public void timeAutoTask() {
-        LocalDateTime now = LocalDateTime.now().plusDays(-1);
-        Zone zone = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth(), now.getMonthValue(), now.getYear(), 26);
-        ArrayList<Zone> zones = new ArrayList<>();
-        zones.add(zone);
-        //Zone zone = zoneServer.getselectTotalZoneForDay(24, 5, 2021,26);
-        Zone beforeYesterdayZone = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth() - 1, now.getMonthValue(), now.getYear(), 26);
-        Zone beforeYesterdayZone2 = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth() - 2, now.getMonthValue(), now.getYear(), 26);
-        int differenceData = 0;
-        int differenceData2 = 0;
-        String stringPercentage = null;
-        if (zone != null && beforeYesterdayZone != null) {
-            differenceData = zone.gettValue() - beforeYesterdayZone.gettValue();
-        } else {
-            differenceData = 0;
-        }
-        if (beforeYesterdayZone2 != null) {
-            differenceData2 = beforeYesterdayZone.gettValue() - beforeYesterdayZone2.gettValue();
-            Double percentage = (differenceData - differenceData2) / (differenceData2 * 1.0) * 100;
-            NumberFormat compactNumberInstance = NumberFormat.getNumberInstance();
-            compactNumberInstance.setMaximumFractionDigits(2);
 
-             stringPercentage = compactNumberInstance.format(percentage) + "%";
-            stringZoneHashMap.put("dd", zones);
-            stringZoneHashMap.put("total", zone);
-            stringZoneHashMap.put("diff", differenceData);
-            stringZoneHashMap.put("percentage", stringPercentage);
-            concurrentHashMap.forEach((key, value) -> {
-                try {
-                    value.send(SseEmitter.event().id(Integer.toString(integerConcurrentHashMap.get(key))).data(stringZoneHashMap));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    value.complete();
-                    concurrentHashMap.remove(key);
-                    integerConcurrentHashMap.remove(key);
-                }
-            });
-        }
+        sseEmitterService.sendSseEmitterControllerDataForDay(noTotalForEidConcurrentHashMap,concurrentHashMap,integerConcurrentHashMap,modeConcurrentHashMap,selectModesConcurrentHashMap,noTotalFornodeConcurrentHashMap);
+
+
     }
+
+
+
+
+
 
     
 
     private void sendTotalZoneData()
     {
         LocalDateTime now = LocalDateTime.now().plusDays(-1);
-        Zone zone = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth(), now.getMonthValue(), now.getYear(),26);
+        Zone zone = zoneServer.getselectZoneForSpecificTime(now.getDayOfMonth(), now.getMonthValue(), now.getYear(),26);
         //Zone zone = zoneServer.getselectTotalZoneForDay(27, 6, 2021,26);
-        Zone beforeYesterdayZone = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth()-1, now.getMonthValue(), now.getYear(),26);
-        Zone beforeYesterdayZone2 = zoneServer.getselectTotalZoneForDay(now.getDayOfMonth()-2, now.getMonthValue(), now.getYear(),26);
+        Zone beforeYesterdayZone = zoneServer.getselectZoneForSpecificTime(now.getDayOfMonth()-1, now.getMonthValue(), now.getYear(),26);
+        Zone beforeYesterdayZone2 = zoneServer.getselectZoneForSpecificTime(now.getDayOfMonth()-2, now.getMonthValue(), now.getYear(),26);
         int differenceData=0;
         int differenceData2=0;
         String stringPercentage=null;

@@ -24,6 +24,7 @@ public interface ZoneDAO  {
     public Zone sqlservertransfer(Integer eid);
     public List<Zone> sqlserverSelectAllLastZone();
     public Zone selectSingleZone(Integer eid);
+    public List<Zone> selectTotalZone();
 
 
 

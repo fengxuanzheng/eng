@@ -55,8 +55,8 @@ public class SseEmitterService {
 
     private ArrayList<String> totalModeForHours = new ArrayList<>();
     private ArrayList<String> totalModeForDays = new ArrayList<>();
-    private ArrayList<String> NoTotalModeForHours = new ArrayList<>();
-    private ArrayList<String> NoTotalModeForDays = new ArrayList<>();
+    private ArrayList<String> noTotalModeForHours = new ArrayList<>();
+    private ArrayList<String> noTotalModeForDays = new ArrayList<>();
 
 
     @Async
@@ -100,11 +100,11 @@ public class SseEmitterService {
           {
               if ("hours".equals(selectModes.get(key)))
               {
-                  NoTotalModeForHours.add(key);
+                  noTotalModeForHours.add(key);
               }
               else
               {
-                  NoTotalModeForDays.add(key);
+                  noTotalModeForDays.add(key);
               }
           }
       });
@@ -158,13 +158,13 @@ public class SseEmitterService {
 
                       sendToSseemiter.put(iteam,totalDays);
                   }
-                  else if (NoTotalModeForHours.contains(iteam))
+                  else if (noTotalModeForHours.contains(iteam))
                   {
                       Map<String, Object> hours = selectDataOfSseOnMode(year, monthValue, dayOfMonth, false, "hours", noTotalForEid.get(iteam), null, false);
                       sendToSseemiter.put(iteam,hours);
 
                   }
-                  else if (NoTotalModeForDays.contains(iteam))
+                  else if (noTotalModeForDays.contains(iteam))
                   {
                       Map<String, Object> hours = selectDataOfSseOnMode(year, monthValue, dayOfMonth, false, "days", noTotalForEid.get(iteam), null, false);
                       sendToSseemiter.put(iteam,hours);
@@ -204,8 +204,8 @@ public class SseEmitterService {
                       integerMap.remove(next);
                       totalModeForDays.remove(next);
                       totalModeForHours.remove(next);
-                      NoTotalModeForDays.remove(next);
-                      NoTotalModeForHours.remove(next);
+                      noTotalModeForDays.remove(next);
+                      noTotalModeForHours.remove(next);
 
                       modeMap.remove(next);
                       selectModes.remove(next);
@@ -246,29 +246,13 @@ public class SseEmitterService {
               HashMap<String, Map<String, Object>> sendToSseemiter = new HashMap<>();
               if (totalModeForHours.size()!=0)
               {
-                  Zone selectSingleZoneForT3 = zoneServer.getSelectSingleZone(26);
-                  Zone selectSingleZoneForT4 = zoneServer.getSelectSingleZone(27);
-                  Zone totalZone = new Zone(selectSingleZoneForT3.getEid(), selectSingleZoneForT3.gettValue() + selectSingleZoneForT4.gettValue(), selectSingleZoneForT3.gettTime());
-                  ProAmount singleProAmount = proAmountServer.getSingleProAmount(5);
-                  storageTotalMode.put("T3",selectSingleZoneForT3);
-                  storageTotalMode.put("T4",selectSingleZoneForT4);
-                  storageTotalMode.put("total",totalZone);
-                  storageTotalMode.put("amount",singleProAmount);
-                  totalModeForHours.forEach(value->{
-                      sendToSseemiter.put(value,storageTotalMode);
-                  });
-              }
-               if (NoTotalModeForHours.size()!=0)
-              {
-                  NoTotalModeForHours.forEach(value->{
-                      Zone selectSingleZone = zoneServer.getSelectSingleZone(noTotalForEid.get(value));
-                      ArrayList<Zone> zones = new ArrayList<>(1);
-                      HashMap<String, Object> storageNoTatalMode = new HashMap<>();
-                      zones.add(selectSingleZone);
-                      storageNoTatalMode.put("single",zones);
-                      sendToSseemiter.put(value,storageNoTatalMode);
 
-                  });
+                  selectDataForTotalMode("hours",storageTotalMode,sendToSseemiter);
+              }
+               if (noTotalModeForHours.size()!=0)
+              {
+
+                  selectDataForNoTotalMode("hours",noTotalForEid,sendToSseemiter);
               }
 
               //Zone zone = zoneDAO.selectTotalZone();
@@ -281,6 +265,39 @@ public class SseEmitterService {
                   sseEmitterMap.forEach((key, value) -> {
                       try {
                           if (!filterSseEmitter.contains(key))
+                          {
+                              if (totalModeForHours.contains(key) || noTotalModeForHours.contains(key))
+                              {
+                                  value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(sendToSseemiter.get(value), MediaType.APPLICATION_JSON));
+                                  integerMap.put(key,integerMap.get(key)+1);
+                              }
+
+                          }
+
+
+                      } catch (IOException e) {
+                          e.printStackTrace();
+                          log.info(e.getMessage());
+                          value.complete();
+                          sseEmitterMap.remove(key);
+                          integerMap.remove(key);
+                          totalModeForDays.remove(key);
+                          totalModeForHours.remove(key);
+                          noTotalModeForDays.remove(key);
+                          noTotalModeForHours.remove(key);
+                          modeMap.remove(key);
+                          selectModes.remove(key);
+                          noTotalForEid.remove(key);
+                          nototalForNode.remove(key);
+                      }
+                  });
+                  filterSseEmitter.clear();
+              }
+              else
+              {
+                  sseEmitterMap.forEach((key, value) -> {
+                      try {
+                          if (totalModeForHours.contains(key) || noTotalModeForHours.contains(key))
                           {
                               value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(sendToSseemiter.get(value), MediaType.APPLICATION_JSON));
                               integerMap.put(key,integerMap.get(key)+1);
@@ -295,33 +312,8 @@ public class SseEmitterService {
                           integerMap.remove(key);
                           totalModeForDays.remove(key);
                           totalModeForHours.remove(key);
-                          NoTotalModeForDays.remove(key);
-                          NoTotalModeForHours.remove(key);
-                          modeMap.remove(key);
-                          selectModes.remove(key);
-                          noTotalForEid.remove(key);
-                          nototalForNode.remove(key);
-                      }
-                  });
-                  filterSseEmitter.clear();
-              }
-              else
-              {
-                  sseEmitterMap.forEach((key, value) -> {
-                      try {
-                          value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(sendToSseemiter.get(value), MediaType.APPLICATION_JSON));
-                          integerMap.put(key,integerMap.get(key)+1);
-
-                      } catch (IOException e) {
-                          e.printStackTrace();
-                          log.info(e.getMessage());
-                          value.complete();
-                          sseEmitterMap.remove(key);
-                          integerMap.remove(key);
-                          totalModeForDays.remove(key);
-                          totalModeForHours.remove(key);
-                          NoTotalModeForDays.remove(key);
-                          NoTotalModeForHours.remove(key);
+                          noTotalModeForDays.remove(key);
+                          noTotalModeForHours.remove(key);
                           modeMap.remove(key);
                           selectModes.remove(key);
                           noTotalForEid.remove(key);
@@ -351,20 +343,113 @@ public class SseEmitterService {
               }
           });
       }
+
+      public void selectDataForTotalMode(String mode,Map<String,Object> storageTotalMode,Map<String,Map<String,Object>> sendToSseemiter)
+      {
+          Zone selectSingleZoneForT3 = zoneServer.getSelectSingleZone(26);
+          Zone selectSingleZoneForT4 = zoneServer.getSelectSingleZone(27);
+          Zone totalZone = new Zone(selectSingleZoneForT3.getEid(), selectSingleZoneForT3.gettValue() + selectSingleZoneForT4.gettValue(), selectSingleZoneForT3.gettTime());
+          ProAmount singleProAmount = proAmountServer.getSingleProAmount(5);
+          storageTotalMode.put("T3",selectSingleZoneForT3);
+          storageTotalMode.put("T4",selectSingleZoneForT4);
+          storageTotalMode.put("total",totalZone);
+          storageTotalMode.put("amount",singleProAmount);
+          if ("hours".equals(mode))
+          {
+              totalModeForHours.forEach(value->{
+                  sendToSseemiter.put(value,storageTotalMode);
+              });
+          }
+          else
+          {
+              totalModeForDays.forEach(iteam->{
+                  sendToSseemiter.put(iteam,storageTotalMode);
+              });
+          }
+
+      }
+      public void selectDataForNoTotalMode(String mode,Map<String,Integer>noTotalForEid,Map<String,Map<String,Object>> sendToSseemiter)
+      {
+          if ("hours".equals(mode))
+          {
+              noTotalModeForHours.forEach(value->{
+                  Zone selectSingleZone = zoneServer.getSelectSingleZone(noTotalForEid.get(value));
+                  ArrayList<Zone> zones = new ArrayList<>(1);
+                  HashMap<String, Object> storageNoTatalMode = new HashMap<>();
+                  zones.add(selectSingleZone);
+                  storageNoTatalMode.put("single",zones);
+                  sendToSseemiter.put(value,storageNoTatalMode);
+
+              });
+          }
+          else
+          {
+              noTotalModeForDays.forEach(iteam->{
+                  Zone selectSingleZone = zoneServer.getSelectSingleZone(noTotalForEid.get(iteam));
+                  ArrayList<Zone> zones = new ArrayList<>(1);
+                  HashMap<String, Object> storageNoTatalMode = new HashMap<>();
+                  zones.add(selectSingleZone);
+                  storageNoTatalMode.put("single",zones);
+                  sendToSseemiter.put(iteam,storageNoTatalMode);
+              });
+          }
+
+      }
+
+      public void sendSseEmitterControllerDataForDay(Map<String,Integer>noTotalForEid,Map<String,SseEmitter> sseEmitterMap,Map<String,Integer> integerMap,Map<String,String>modeMap,Map<String,String>selectModes,Map<String,Integer>nototalForNode)
+      {
+          HashMap<String, Object> storageTotalMode = new HashMap<>();
+
+          HashMap<String, Map<String, Object>> sendToSseemiter = new HashMap<>();
+          if (totalModeForDays.size()!=0)
+          {
+              selectDataForTotalMode("days",storageTotalMode,sendToSseemiter);
+          }
+          if (noTotalModeForDays.size()!=0)
+          {
+              selectDataForNoTotalMode("days",noTotalForEid,sendToSseemiter);
+          }
+          sseEmitterMap.forEach((key, value) -> {
+              try {
+                  if (totalModeForDays.contains(key) || noTotalModeForDays .contains(key))
+                  {
+                      value.send(SseEmitter.event().id(Integer.toString(integerMap.get(key))).data(sendToSseemiter.get(key)));
+                      integerMap.put(key,integerMap.get(key)+1);
+                  }
+
+              } catch (IOException e) {
+                  e.printStackTrace();
+                  value.complete();
+                  sseEmitterMap.remove(key);
+                  integerMap.remove(key);
+                  totalModeForDays.remove(key);
+                  totalModeForHours.remove(key);
+                  noTotalModeForDays.remove(key);
+                  noTotalModeForHours.remove(key);
+                  modeMap.remove(key);
+                  selectModes.remove(key);
+                  noTotalForEid.remove(key);
+                  nototalForNode.remove(key);
+              }
+          });
+      }
       public void closeSseEmitter(String id,Map<String,SseEmitter> sseEmitterMap,Map<String,Integer> integerMap ,Map<String,String>modeMap,Map<String,String>selectModes,Map<String,Integer>noTotalForEid,Map<String,Integer> nototalForNode)
       {
-          SseEmitter sseEmitter = sseEmitterMap.get(id);
-          sseEmitter.complete();
-          sseEmitterMap.remove(id);
-          integerMap.remove(id);
-          modeMap.remove(id);
-          selectModes.remove(id);
-          noTotalForEid.remove(id);
-          nototalForNode.remove(id);
-          totalModeForDays.remove(id);
-          totalModeForHours.remove(id);
-          NoTotalModeForDays.remove(id);
-          NoTotalModeForHours.remove(id);
+
+              SseEmitter sseEmitter = sseEmitterMap.get(id);
+              sseEmitter.complete();
+              sseEmitterMap.remove(id);
+              integerMap.remove(id);
+              modeMap.remove(id);
+              selectModes.remove(id);
+              noTotalForEid.remove(id);
+              nototalForNode.remove(id);
+              totalModeForDays.remove(id);
+              totalModeForHours.remove(id);
+              noTotalModeForDays.remove(id);
+              noTotalModeForHours.remove(id);
+
+
 
       }
       public Map<String,Object>selectDataOfSseOnMode(Integer year,Integer monthValue,Integer dayOfMonth,Boolean isTotalMode,String selectMode,@Nullable Integer eid,@Nullable Integer node,@Nullable Boolean isSelectAmount)

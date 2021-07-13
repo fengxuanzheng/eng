@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.EnergyProject.dao.ZoneDAOForEhcache">
     <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
-    <select id="selectTotalZoneForDay" resultType="com.EnergyProject.pojo.Zone">
+    <select id="selectZoneForSpecificTime" resultType="com.EnergyProject.pojo.Zone">
         SELECT top 1  eid,t_time,t_value from zone where DAY(t_time)=#{day}  AND MONTH(t_time)=#{month} AND YEAR(t_time)=#{year}  and eid=#{eid} ORDER BY t_time DESC
     </select>
     <select id="getZoneAllNode" resultType="java.lang.Integer">
@@ -10,5 +10,8 @@
     </select>
     <select id="selectDafultForMininunt" resultType="com.EnergyProject.pojo.Zone">
         select eid,t_value,t_time from zone where eid=#{eid} and t_time >= #{starttime} and t_time &lt; #{emdtime} ORDER BY t_time
+    </select>
+    <select id="selectTotalZoneForYesterday" resultType="com.EnergyProject.pojo.Zone">
+        SELECT top 2  eid,t_time,t_value from zone where DAY(t_time)=#{day}  AND MONTH(t_time)=#{month} AND YEAR(t_time)=#{year} and eid in(26,27) ORDER BY t_time DESC
     </select>
 </mapper>

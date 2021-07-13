@@ -8,8 +8,9 @@ import java.util.Map;
 
 public interface ZoneDAOForEhcache {
 
-    public Zone selectTotalZoneForDay(@Param("day") Integer day, @Param("month") Integer month, @Param("year") Integer year,@Param("eid") Integer eid);
+    public Zone selectZoneForSpecificTime(@Param("day") Integer day, @Param("month") Integer month, @Param("year") Integer year,@Param("eid") Integer eid);
     public List<Integer> getZoneAllNode();
     public List<Zone> selectDafultForMininunt(Map<String,Object> inputParameter);
+    public List<Zone> selectTotalZoneForYesterday(@Param("day") Integer day, @Param("month") Integer month, @Param("year") Integer year);
 
 }

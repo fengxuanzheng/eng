@@ -244,9 +244,13 @@ public class ZoneServer {
         return zoneDAOForNoCallable.sqlserverSelectAllLastZone();
     }
 
-    public Zone getselectTotalZoneForDay(Integer day,Integer month,Integer year,Integer eid){
-        return zoneDAOForEhcache.selectTotalZoneForDay(day, month, year,eid);
+    public Zone getselectZoneForSpecificTime(Integer day,Integer month,Integer year,Integer eid){
+        return zoneDAOForEhcache.selectZoneForSpecificTime(day, month, year,eid);
 
+    }
+    public List<Zone> getselectTotalZoneForYesterday(Integer day,Integer month,Integer year)
+    {
+       return zoneDAOForEhcache.selectTotalZoneForYesterday( day, month, year);
     }
 
     public List<Integer> getZoneAllNode(){
@@ -326,6 +330,10 @@ public class ZoneServer {
     {
        return zoneDAO.selectSingleZone(eid);
     }
+    public List<Zone> selectTotalZone()
+    {
+        return zoneDAO.selectTotalZone();
+    }
 
     public List<Zone> getzonelistForCUROS(Map<String,Object> intoParament)
     {
@@ -335,39 +343,49 @@ public class ZoneServer {
     {
         return zoneDAO.getzonelistForCUROSForDay(intoParament);
     }
-    public void hoursAmount(Map<String,Object>sendData,Integer year,Integer monthValue,Integer dayOfMonth,Boolean isSelectOfHours,Boolean isTotal, @Nullable Integer node)
+    public void hoursAmount(Map<String,Object>sendData,Integer year,Integer monthValue,Integer dayOfMonth,String selectMode,Boolean isTotal, @Nullable Integer node)
     {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         ArrayList<ProAmount> proAmounts = new ArrayList<>();
         List<ProAmount> proAmountList=null;
         if (isTotal)
         {
+            if ("hours".equals(selectMode))
+            {
             stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,dayOfMonth,0,0,0));
             stringObjectHashMap.put("node", 5);
             stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue,dayOfMonth+1,0,30,0));
             stringObjectHashMap.put("addtime", 1);
-            if (isSelectOfHours)
-            {
+
                 proAmountList = proAmountServer.getProAmountList(stringObjectHashMap);
             }
             else
             {
+                stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,1,0,0,0));
+                stringObjectHashMap.put("node", 5);
+                stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue+1,1,0,30,0));
+                stringObjectHashMap.put("addtime", 1);
                 proAmountList = proAmountServer.getProAmountListForDay(stringObjectHashMap);
             }
 
         }
         else
         {
+            if ("hours".equals(selectMode))
+            {
             stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,dayOfMonth,0,0,0));
             stringObjectHashMap.put("node", node);
             stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue,dayOfMonth+1,0,30,0));
             stringObjectHashMap.put("addtime", 1);
-            if (isSelectOfHours)
-            {
+
                 proAmountList = proAmountServer.getProAmountList(stringObjectHashMap);
             }
             else
             {
+                stringObjectHashMap.put("starttime", LocalDateTime.of(year,monthValue,1,0,0,0));
+                stringObjectHashMap.put("node", node);
+                stringObjectHashMap.put("endTime", LocalDateTime.of(year,monthValue+1,1,0,30,0));
+                stringObjectHashMap.put("addtime", 1);
                 proAmountList = proAmountServer.getProAmountListForDay(stringObjectHashMap);
             }
         }

@@ -69,10 +69,10 @@ public class ZoneController {
         int year = localDateTime.getYear();
         int monthValue = localDateTime.getMonthValue();
         int dayOfMonth = localDateTime.getDayOfMonth();
-        zoneServer.handlerDateOfAmount(frontEndData,year,6,27,true,Hours,null);
+        zoneServer.handlerDateOfAmount(frontEndData,year,monthValue,dayOfMonth,true,Hours,null);
         if (isAmount)
         {
-            zoneServer.hoursAmount(frontEndData,year,6,27,Hours,true,5);
+            zoneServer.hoursAmount(frontEndData,year,monthValue,dayOfMonth,Hours,true,5);
         }
 
         return frontEndData;
@@ -109,9 +109,9 @@ public class ZoneController {
     {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         LocalDateTime localDateTime = LocalDateTime.now().plusDays(-1);
-        List<Zone> zoneYesterday = zoneServer.getselectTotalZoneForYesterday(27, 6, localDateTime.getYear());
-        List<Zone> zoneBeforeDay = zoneServer.getselectTotalZoneForYesterday(26, 6, localDateTime.getYear());
-        List<Zone> zoneLastMonth = zoneServer.getselectTotalZoneForYesterday(27, 5, localDateTime.getYear());
+        List<Zone> zoneYesterday = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth(), localDateTime.getMonthValue(), localDateTime.getYear());
+        List<Zone> zoneBeforeDay = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth()-1, localDateTime.getMonthValue(), localDateTime.getYear());
+        List<Zone> zoneLastMonth = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth(), localDateTime.getMonthValue()-1, localDateTime.getYear());
         IntSummaryStatistics collectYesterday = zoneYesterday.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         IntSummaryStatistics collectBeforeDay = zoneBeforeDay.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         IntSummaryStatistics collectLastMonth = zoneLastMonth.stream().collect(Collectors.summarizingInt(Zone::gettValue));

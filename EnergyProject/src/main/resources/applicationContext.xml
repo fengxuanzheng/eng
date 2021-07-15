@@ -41,7 +41,11 @@
         <property name="configLocation" value="classpath:mybatis-config.xml"/>
         <property name="dataSource" ref="comboPooledDataSource"/>
         <property name="mapperLocations" value="classpath:com/EnergyProject/dao/*.xml"/>
-
+        <property name="plugins">
+            <array>
+                <ref bean="mybatisPlusInterceptor"/>
+            </array>
+        </property>
     </bean>
 
     <!--<bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactoryBean">
@@ -59,6 +63,33 @@
         <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactoryBean" />
         <constructor-arg name="executorType" value="SIMPLE"/>
     </bean>
+
+    <bean id="globalConfig" class="com.baomidou.mybatisplus.core.config.GlobalConfig">
+        <property name="dbConfig" ref="dbConfig"/>
+
+    </bean>
+
+    <bean id="dbConfig" class="com.baomidou.mybatisplus.core.config.GlobalConfig.DbConfig">
+        <property name="idType" value="AUTO"/>
+    </bean>
+    <bean id="configuration" class="com.baomidou.mybatisplus.core.MybatisConfiguration">
+
+    </bean>
+
+    <bean id="mybatisPlusInterceptor" class="com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor">
+        <property name="interceptors">
+            <list>
+                <ref bean="paginationInnerInterceptor"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="paginationInnerInterceptor" class="com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor">
+        <!-- 对于单一数据库类型来说,都建议配置该值,避免每次分页都去抓取数据库类型 -->
+        <constructor-arg name="dbType" value="SQL_SERVER"/>
+
+    </bean>
+
 
 
     <!--配置事务管理器-->

@@ -18,11 +18,20 @@
         <result column="safetyPerson" property="safetyPerson" />
         <result column="phone" property="phone" />
         <result column="workTime" property="workTime" />
+        <result column="username" property="username"/>
+        <result column="usernameId" property="usernameId"/>
+        <result column="usernameDistrict" property="usernameDistrict"/>
+        <result column="applyTime" property="applyTime"/>
+        <result column="checkTime" property="checkTime"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, status, equipmentName, workContainer, workWaring, safety, energyType, energySource, energyManagement, workLocation, workPerson, safetyPerson, phone, workTime
+        id, status, equipmentName, workContainer, workWaring, safety, energyType, energySource, energyManagement, workLocation, workPerson, safetyPerson, phone, workTime,username,usernameId,usernameDistrict,applyTime,checkTime
     </sql>
+
+    <select id="getAllUsername" resultType="string">
+        select distinct username from ApplyReport where username is not null
+    </select>
 
 </mapper>

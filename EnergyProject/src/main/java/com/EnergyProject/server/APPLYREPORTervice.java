@@ -1,6 +1,7 @@
 package com.EnergyProject.server;
 
 import com.EnergyProject.pojo.ApplyReport;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -21,4 +22,11 @@ public interface APPLYREPORTervice extends IService<ApplyReport> {
 
     public Integer updataApplyReportDataStatus(Integer[] selectId, String selectMode);
     public Integer singleApplyReportDataStatus(ApplyReport applyReport);
+
+    IPage<ApplyReport> getAllApplyReport(Integer page, Integer size);
+
+    IPage<ApplyReport> selectOfApplyUsername(Map<String,Object> accurateSelect,Integer page, Integer size);
+
+
+    List<String> getAllUsername();
 }

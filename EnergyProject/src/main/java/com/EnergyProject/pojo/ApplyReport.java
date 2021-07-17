@@ -1,10 +1,7 @@
 package com.EnergyProject.pojo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
@@ -27,6 +24,15 @@ public class ApplyReport extends Model<ApplyReport> {
     private Integer id;
     @TableField("status")
     private String status;
+
+    @TableField("username")
+    private String username;
+
+    @TableField("usernameId")
+    private Integer usernameId;
+
+    @TableField("usernameDistrict")
+    private String usernameDistrict;
 
     @TableField("equipmentName")
     private String equipmentName;
@@ -65,6 +71,13 @@ public class ApplyReport extends Model<ApplyReport> {
     @TableField("workTime")
     private LocalDateTime workTime;
 
+    @TableField("applyTime")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
+    private LocalDateTime applyTime;
+
+    @TableField(value = "checkTime",fill = FieldFill.UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
+    private LocalDateTime checkTime;
 
     public Integer getId() {
         return id;
@@ -178,6 +191,46 @@ public class ApplyReport extends Model<ApplyReport> {
         this.workTime = workTime;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Integer getUsernameId() {
+        return usernameId;
+    }
+
+    public void setUsernameId(Integer usernameId) {
+        this.usernameId = usernameId;
+    }
+
+    public String getUsernameDistrict() {
+        return usernameDistrict;
+    }
+
+    public void setUsernameDistrict(String usernameDistrict) {
+        this.usernameDistrict = usernameDistrict;
+    }
+
+    public LocalDateTime getApplyTime() {
+        return applyTime;
+    }
+
+    public void setApplyTime(LocalDateTime applyTime) {
+        this.applyTime = applyTime;
+    }
+
+    public LocalDateTime getCheckTime() {
+        return checkTime;
+    }
+
+    public void setCheckTime(LocalDateTime checkTime) {
+        this.checkTime = checkTime;
+    }
+
     @Override
     public Serializable pkVal() {
         return this.id;
@@ -186,20 +239,25 @@ public class ApplyReport extends Model<ApplyReport> {
     @Override
     public String toString() {
         return "ApplyReport{" +
-        "id=" + id +
-        ", status=" + status +
-        ", equipmentName=" + equipmentName +
-        ", workContainer=" + workContainer +
-        ", workWaring=" + workWaring +
-        ", safety=" + safety +
-        ", energyType=" + energyType +
-        ", energySource=" + energySource +
-        ", energyManagement=" + energyManagement +
-        ", workLocation=" + workLocation +
-        ", workPerson=" + workPerson +
-        ", safetyPerson=" + safetyPerson +
-        ", phone=" + phone +
-        ", workTime=" + workTime +
-        "}";
+                "id=" + id +
+                ", status='" + status + '\'' +
+                ", username='" + username + '\'' +
+                ", usernameId=" + usernameId +
+                ", usernameDistrict='" + usernameDistrict + '\'' +
+                ", equipmentName='" + equipmentName + '\'' +
+                ", workContainer='" + workContainer + '\'' +
+                ", workWaring='" + workWaring + '\'' +
+                ", safety='" + safety + '\'' +
+                ", energyType='" + energyType + '\'' +
+                ", energySource='" + energySource + '\'' +
+                ", energyManagement='" + energyManagement + '\'' +
+                ", workLocation='" + workLocation + '\'' +
+                ", workPerson='" + workPerson + '\'' +
+                ", safetyPerson='" + safetyPerson + '\'' +
+                ", phone=" + phone +
+                ", workTime=" + workTime +
+                ", applyTime=" + applyTime +
+                ", checkTime=" + checkTime +
+                '}';
     }
 }

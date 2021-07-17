@@ -41,6 +41,7 @@
         <property name="configLocation" value="classpath:mybatis-config.xml"/>
         <property name="dataSource" ref="comboPooledDataSource"/>
         <property name="mapperLocations" value="classpath:com/EnergyProject/dao/*.xml"/>
+        <property name="globalConfig" ref="globalConfig"/>
         <property name="plugins">
             <array>
                 <ref bean="mybatisPlusInterceptor"/>
@@ -66,11 +67,12 @@
 
     <bean id="globalConfig" class="com.baomidou.mybatisplus.core.config.GlobalConfig">
         <property name="dbConfig" ref="dbConfig"/>
+        <property name="metaObjectHandler" ref="myMetaObjectHandler"/>
 
     </bean>
-
     <bean id="dbConfig" class="com.baomidou.mybatisplus.core.config.GlobalConfig.DbConfig">
         <property name="idType" value="AUTO"/>
+
     </bean>
     <bean id="configuration" class="com.baomidou.mybatisplus.core.MybatisConfiguration">
 

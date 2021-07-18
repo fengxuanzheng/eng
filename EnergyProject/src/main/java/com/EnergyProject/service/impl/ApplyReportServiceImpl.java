@@ -69,14 +69,83 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
     }
 
     @Override
-    public IPage<ApplyReport> selectOfApplyUsername(Map<String,Object> accurateSelect,Integer page, Integer size) {
-        return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page),new QueryWrapper<ApplyReport>().allEq(accurateSelect,false).orderByAsc("id"));
+    public IPage<ApplyReport> selectOfApplyUsername(Map<String,Map<String,Object>> accurateSelect,Integer page, Integer size) {
+        Map<String, Object> publice = accurateSelect.get("publice");
+        Map<String, Object> selectTime = accurateSelect.get("selectTime");
+        if (selectTime!=null) {
+            Object startWorkTime = selectTime.get("startWorkTime");
+            Object endWorkTime = selectTime.get("endWorkTime");
+            Object startApplyTime = selectTime.get("startApplyTime");
+            Object endApplyTime = selectTime.get("endApplyTime");
+            Object startCheckTime = selectTime.get("startCheckTime");
+            Object endCheckTime = selectTime.get("endCheckTime");
+
+
+            if (startWorkTime != null && endWorkTime != null  && startApplyTime == null && endApplyTime == null && startCheckTime==null && endCheckTime== null) {
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTime", startWorkTime, endWorkTime).orderByAsc("id"));
+            } else if (startApplyTime != null && endApplyTime != null && startWorkTime == null && endWorkTime == null && startCheckTime==null && endCheckTime== null) {
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("applyTime", startApplyTime, endApplyTime).orderByAsc("id"));
+            }else if (startCheckTime!=null && endCheckTime !=null &&  startWorkTime == null && endWorkTime == null && startApplyTime == null && endApplyTime == null)
+            {
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("checkTime",startCheckTime,endCheckTime).orderByAsc("id"));
+            }
+            else if (startWorkTime != null && endWorkTime != null && startApplyTime != null && endApplyTime != null && startCheckTime==null && endCheckTime== null) {
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTime", startWorkTime, endWorkTime).between("applyTime", startApplyTime, endApplyTime).orderByAsc("id"));
+            }
+            else if (startWorkTime != null && endWorkTime != null&&startCheckTime!=null && endCheckTime !=null&&startApplyTime == null && endApplyTime == null)
+            {
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTime", startWorkTime, endWorkTime).between("checkTime", startCheckTime, endCheckTime).orderByAsc("id"));
+            }
+            else if (startApplyTime != null && endApplyTime != null&&startCheckTime!=null && endCheckTime !=null&&startWorkTime == null && endWorkTime == null)
+            {
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("applyTime", startApplyTime, endApplyTime).between("checkTime", startCheckTime, endCheckTime).orderByAsc("id"));
+            }
+            else if (startApplyTime != null && endApplyTime != null&&startCheckTime!=null && endCheckTime !=null&&startWorkTime != null && endWorkTime != null)
+            {
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTime", startWorkTime, endWorkTime).between("applyTime", startApplyTime, endApplyTime).between("checkTime",startCheckTime,endCheckTime).orderByAsc("id"));
+            }
+        }
+        return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).orderByAsc("id"));
+
     }
 
 
     @Override
     public List<String> getAllUsername() {
       return   applyReportMapper.getAllUsername();
+    }
+
+    @Override
+    public Integer deleteApplyReport(Integer id) {
+       return applyReportMapper.deleteById(id);
+    }
+
+    @Override
+    public Integer deleteAllApplyReport(List<Integer> ids) {
+        return applyReportMapper.delete(new QueryWrapper<ApplyReport>().in("id", ids));
+    }
+
+    @Override
+    public ApplyReport updataApplyReport(Integer id) {
+       return applyReportMapper.selectById(id);
+    }
+
+    @Override
+    public Integer updataApplyReportFinall(ApplyReport applyReport) {
+      return   applyReportMapper.updateById(applyReport);
+    }
+
+    @Override
+    public IPage<ApplyReport> getAllApplyReportForReject(Integer page, Integer size) {
+        return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page),new QueryWrapper<ApplyReport>().eq("status","拒绝").orderByAsc("id"));
+    }
+
+    @Override
+    public Integer sendRejectText(Map<String,String> rejectText, Integer id) {
+        ApplyReport applyReport = new ApplyReport();
+        applyReport.setRejectText(rejectText.get("rejectText"));
+        applyReport.setId(id);
+       return applyReportMapper.updateById(applyReport);
     }
 
 }

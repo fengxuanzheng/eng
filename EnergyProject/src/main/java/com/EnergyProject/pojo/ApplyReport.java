@@ -79,6 +79,9 @@ public class ApplyReport extends Model<ApplyReport> {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
     private LocalDateTime checkTime;
 
+    @TableField("rejectText")
+    private String rejectText;
+
     public Integer getId() {
         return id;
     }
@@ -231,6 +234,14 @@ public class ApplyReport extends Model<ApplyReport> {
         this.checkTime = checkTime;
     }
 
+    public String getRejectText() {
+        return rejectText;
+    }
+
+    public void setRejectText(String rejectText) {
+        this.rejectText = rejectText;
+    }
+
     @Override
     public Serializable pkVal() {
         return this.id;
@@ -258,6 +269,7 @@ public class ApplyReport extends Model<ApplyReport> {
                 ", workTime=" + workTime +
                 ", applyTime=" + applyTime +
                 ", checkTime=" + checkTime +
+                ", rejectText='" + rejectText + '\'' +
                 '}';
     }
 }

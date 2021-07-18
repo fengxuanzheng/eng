@@ -23,11 +23,12 @@
         <result column="usernameDistrict" property="usernameDistrict"/>
         <result column="applyTime" property="applyTime"/>
         <result column="checkTime" property="checkTime"/>
+        <result column="rejectText" property="rejectText"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, status, equipmentName, workContainer, workWaring, safety, energyType, energySource, energyManagement, workLocation, workPerson, safetyPerson, phone, workTime,username,usernameId,usernameDistrict,applyTime,checkTime
+        id, status, equipmentName, workContainer, workWaring, safety, energyType, energySource, energyManagement, workLocation, workPerson, safetyPerson, phone, workTime,username,usernameId,usernameDistrict,applyTime,checkTime,rejectText
     </sql>
 
     <select id="getAllUsername" resultType="string">

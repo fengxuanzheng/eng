@@ -61,16 +61,27 @@ public class ApplyReportController {
     }
 
     @GetMapping("/getAllApplyReport")
-    public Map<String,Object> getAllApplyReport(@RequestParam(value = "currentPage",defaultValue = "1")Integer page, @RequestParam(value = "currentSize",defaultValue = "10") Integer size)
+    public Map<String,Object> getAllApplyReport(@RequestParam(value = "currentPage",defaultValue = "1")Integer page, @RequestParam(value = "currentSize",defaultValue = "10") Integer size,@RequestParam(value = "isReject",defaultValue = "false") Boolean isReject)
     {
-        IPage<ApplyReport> allApplyReport = applyreporTervice.getAllApplyReport(page, size);
-        outPutAllApplyReport.put("data",allApplyReport.getRecords());
-        outPutAllApplyReport.put("total",allApplyReport.getTotal());
-        return outPutAllApplyReport;
+        if (!isReject)
+        {
+            IPage<ApplyReport> allApplyReport = applyreporTervice.getAllApplyReport(page, size);
+            outPutAllApplyReport.put("data",allApplyReport.getRecords());
+            outPutAllApplyReport.put("total",allApplyReport.getTotal());
+            return outPutAllApplyReport;
+        }
+        else
+        {
+            IPage<ApplyReport> allApplyReportForReject = applyreporTervice.getAllApplyReportForReject(page, size);
+            outPutAllApplyReport.put("data",allApplyReportForReject.getRecords());
+            outPutAllApplyReport.put("total",allApplyReportForReject.getTotal());
+            return outPutAllApplyReport;
+        }
+
     }
 
     @PostMapping("/selectOfApplyReportOfAccurate")
-    public Map<String,Object> selectOfApplyReportOfAccurate(@RequestBody(required = false) Map<String,Object> accurateSelect,@RequestParam(value = "currentPage",defaultValue = "1")Integer page, @RequestParam(value = "currentSize",defaultValue = "10") Integer size)
+    public Map<String,Object> selectOfApplyReportOfAccurate(@RequestBody(required = false) Map<String,Map<String,Object>> accurateSelect,@RequestParam(value = "currentPage",defaultValue = "1")Integer page, @RequestParam(value = "currentSize",defaultValue = "10") Integer size)
     {
         IPage<ApplyReport> applyReportIPage = applyreporTervice.selectOfApplyUsername(accurateSelect, page, size);
         outPutAllApplyReport.put("data",applyReportIPage.getRecords());
@@ -82,6 +93,37 @@ public class ApplyReportController {
     public List<String> getAllUsername()
     {
         return applyreporTervice.getAllUsername();
+    }
+
+    @DeleteMapping("/deleteApplyReport")
+    public Boolean deleteApplyReport(Integer id)
+    {
+        Integer integer = applyreporTervice.deleteApplyReport(id);
+        return integer!=null;
+    }
+    @PostMapping("/deleteAllApplyReport")
+    public Boolean deleteAllApplyReport(@RequestBody(required = false) List<Integer> ids)
+    {
+        Integer integer = applyreporTervice.deleteAllApplyReport(ids);
+        return integer!=null;
+    }
+    @GetMapping("/updataApplyReport")
+    public ApplyReport updataApplyReport(Integer id)
+    {
+      return   applyreporTervice.updataApplyReport(id);
+    }
+    @PostMapping("/updataApplyReportFinall")
+    public Boolean updataApplyReportFinall(@RequestBody(required = false) ApplyReport applyReport)
+    {
+        Integer integer = applyreporTervice.updataApplyReportFinall(applyReport);
+        return integer!=null;
+    }
+
+    @PostMapping("/sendRejectText")
+    public Boolean sendRejectText(@RequestBody(required = false) Map<String,String> rejectText,Integer id)
+    {
+        Integer integer = applyreporTervice.sendRejectText(rejectText, id);
+        return integer!=null;
     }
 }
 

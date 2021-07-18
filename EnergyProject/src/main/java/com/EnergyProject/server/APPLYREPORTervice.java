@@ -25,8 +25,20 @@ public interface APPLYREPORTervice extends IService<ApplyReport> {
 
     IPage<ApplyReport> getAllApplyReport(Integer page, Integer size);
 
-    IPage<ApplyReport> selectOfApplyUsername(Map<String,Object> accurateSelect,Integer page, Integer size);
+    IPage<ApplyReport> selectOfApplyUsername(Map<String,Map<String,Object>> accurateSelect,Integer page, Integer size);
 
 
     List<String> getAllUsername();
+
+    Integer deleteApplyReport(Integer id);
+
+    Integer deleteAllApplyReport(List<Integer> ids);
+
+    ApplyReport updataApplyReport(Integer id);
+
+    Integer updataApplyReportFinall(ApplyReport applyReport);
+
+    IPage<ApplyReport> getAllApplyReportForReject(Integer page, Integer size);
+
+    Integer sendRejectText(Map<String,String> rejectText, Integer id);
 }

@@ -141,11 +141,24 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
     }
 
     @Override
-    public Integer sendRejectText(Map<String,String> rejectText, Integer id) {
+    public Integer sendRejectText(Map<String,Object> rejectText, Integer id) {
         ApplyReport applyReport = new ApplyReport();
-        applyReport.setRejectText(rejectText.get("rejectText"));
-        applyReport.setId(id);
-       return applyReportMapper.updateById(applyReport);
+        if (id!=null)
+        {
+            applyReport.setRejectText((String) rejectText.get("rejectText"));
+            applyReport.setId(id);
+            return applyReportMapper.updateById(applyReport);
+        }
+        else
+        {
+            applyReport.setRejectText((String) rejectText.get("rejectText"));
+            List<Integer> ids = (List<Integer>) rejectText.get("ids");
+            return applyReportMapper.update(applyReport,new QueryWrapper<ApplyReport>().in("id",ids));
+
+
+        }
+
+
     }
 
 }

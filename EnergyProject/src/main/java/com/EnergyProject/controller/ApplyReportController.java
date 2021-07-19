@@ -120,7 +120,7 @@ public class ApplyReportController {
     }
 
     @PostMapping("/sendRejectText")
-    public Boolean sendRejectText(@RequestBody(required = false) Map<String,String> rejectText,Integer id)
+    public Boolean sendRejectText(@RequestBody(required = false) Map<String,Object> rejectText,Integer id)
     {
         Integer integer = applyreporTervice.sendRejectText(rejectText, id);
         return integer!=null;

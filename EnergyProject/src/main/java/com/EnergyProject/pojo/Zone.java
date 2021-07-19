@@ -16,6 +16,7 @@ public class Zone implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GTM+8")
     private LocalDateTime tTime;
 
+
     public Zone(Integer eid, Integer tValue, LocalDateTime tTime) {
         this.eid = eid;
         this.tValue = tValue;

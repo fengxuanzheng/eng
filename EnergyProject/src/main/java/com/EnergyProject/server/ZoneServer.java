@@ -7,6 +7,7 @@ import com.EnergyProject.pojo.ProAmount;
 import com.EnergyProject.pojo.Zone;
 
 import com.EnergyProject.utils.SelectMode;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -257,7 +258,7 @@ public class ZoneServer {
        return zoneDAOForEhcache.getZoneAllNode();
     }
 
-    public List<Zone> getNodeZoneTotalData(Map<String,Object> intoParament,String selectMode){
+    public List<Zone> getNodeZoneTotalData( Map<String,Object> intoParament, String selectMode){
           /*  ArrayList<Zone> retrunzone = new ArrayList<>();
             for (int i=0;i<24;i++)
             {
@@ -323,7 +324,9 @@ public class ZoneServer {
                 }
             }
         return retrunzone;*/
-        return null;
+        return this.selectMode.selectModeForZoneServer(selectMode, intoParament);
+
+
     }
 
     public Zone getSelectSingleZone(Integer eid)

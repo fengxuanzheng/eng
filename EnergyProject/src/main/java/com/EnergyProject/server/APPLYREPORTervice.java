@@ -40,5 +40,5 @@ public interface APPLYREPORTervice extends IService<ApplyReport> {
 
     IPage<ApplyReport> getAllApplyReportForReject(Integer page, Integer size);
 
-    Integer sendRejectText(Map<String,String> rejectText, Integer id);
+    Integer sendRejectText(Map<String,Object> rejectText, Integer id);
 }

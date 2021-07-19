@@ -5,6 +5,8 @@ import com.EnergyProject.dao.ZoneDAOForNoCallable;
 import com.EnergyProject.pojo.Zone;
 import com.EnergyProject.server.ProAmountServer;
 import com.EnergyProject.server.ZoneServer;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -174,16 +176,21 @@ public class ZoneController {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         stringObjectHashMap.put("starttime", startTime);
         stringObjectHashMap.put("eid", node);
-        stringObjectHashMap.put("endTime",endTime);
-        if ("minutes".equals(selectMode)){
-            stringObjectHashMap.put("addtime", 302);
-        }
-        else
-        {
+        if (!"minutes".equals(selectMode)){
             stringObjectHashMap.put("addtime", 1);
         }
-
+        switch (selectMode) {
+            case "hours" -> {
+                LocalDateTime localDateTime = endTime.plusHours(1);
+                stringObjectHashMap.put("endTime", localDateTime);
+            }
+            case "days" -> {
+                LocalDateTime localDateTime1 = endTime.plusDays(1);
+                stringObjectHashMap.put("endTime", localDateTime1);
+            }
+        }
         List<Zone> nodeZoneTotalData = zoneServer.getNodeZoneTotalData(stringObjectHashMap, selectMode);
+
         if ("total".equals(selectType))
         {
             return nodeZoneTotalData;
@@ -197,33 +204,11 @@ public class ZoneController {
             });
             System.out.println(zones);
             Zone zone=null;
-            if ("hours".equals(selectMode))
+            for (int i=0;i<nodeZoneTotalData.size()-1;i++)
             {
-               lastDataTime= startTime.plusHours(-1);
-                 zone= zoneServer.getselectZoneForSpecificTime(lastDataTime.getDayOfMonth(), lastDataTime.getMonthValue(), lastDataTime.getYear(), node);
-
+                zones.get(i).settValue(nodeZoneTotalData.get(i+1).gettValue()-nodeZoneTotalData.get(i).gettValue());
             }
-            else if ("days".equals(selectMode))
-            {
-                lastDataTime=startTime.plusDays(-1);
-                zone= zoneServer.getselectZoneForSpecificTime(lastDataTime.getDayOfMonth(), lastDataTime.getMonthValue(), lastDataTime.getYear(), node);
-            }
-            else
-            {
-                lastDataTime=startTime.plusSeconds(-302);
-                zone= zoneServer.getselectZoneForSpecificTime(lastDataTime.getDayOfMonth(), lastDataTime.getMonthValue(), lastDataTime.getYear(), node);
-            }
-            for (int i=0;i<nodeZoneTotalData.size();i++)
-            {
-                if (i==0)
-                {
-                    zones.get(i).settValue(nodeZoneTotalData.get(i).gettValue()-zone.gettValue());
-                }
-                else
-                {
-                    zones.get(i).settValue(nodeZoneTotalData.get(i).gettValue()-nodeZoneTotalData.get(i-1).gettValue());
-                }
-            }
+            zones.remove(zones.size()-1);
             return zones;
         }
 

@@ -2,6 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.EnergyProject.dao.ZoneDAO">
 
+
+
     <resultMap id="mapzone1" type="com.EnergyProject.pojo.Zone">
         <result property="tValue" column="t_value"/>
         <result property="tTime" column="t_time"/>
@@ -142,6 +144,7 @@
             )
             }
     </select>
+
     <select id="getzonelistForCUROSForDay" statementType="CALLABLE"  resultMap="mapzone1">
         {
          call finallgetvaluediffonCUROSFORDAY(

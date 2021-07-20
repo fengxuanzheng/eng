@@ -254,6 +254,7 @@ public class ZoneServer {
        return zoneDAOForEhcache.selectTotalZoneForYesterday( day, month, year);
     }
 
+
     public List<Integer> getZoneAllNode(){
        return zoneDAOForEhcache.getZoneAllNode();
     }
@@ -325,10 +326,10 @@ public class ZoneServer {
             }
         return retrunzone;*/
         return this.selectMode.selectModeForZoneServer(selectMode, intoParament);
-
-
     }
-
+    public List<Zone> selectDafultForMininunt(Map<String,Object> stringObjectMap){
+       return zoneDAOForEhcache.selectDafultForMininunt(stringObjectMap);
+    }
     public Zone getSelectSingleZone(Integer eid)
     {
        return zoneDAO.selectSingleZone(eid);

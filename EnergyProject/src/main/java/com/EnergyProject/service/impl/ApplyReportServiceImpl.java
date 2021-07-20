@@ -82,7 +82,7 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
 
 
             if (startWorkTime != null && endWorkTime != null  && startApplyTime == null && endApplyTime == null && startCheckTime==null && endCheckTime== null) {
-                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTime", startWorkTime, endWorkTime).orderByAsc("id"));
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTimeStart", startWorkTime, endWorkTime).orderByAsc("id"));
             } else if (startApplyTime != null && endApplyTime != null && startWorkTime == null && endWorkTime == null && startCheckTime==null && endCheckTime== null) {
                 return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("applyTime", startApplyTime, endApplyTime).orderByAsc("id"));
             }else if (startCheckTime!=null && endCheckTime !=null &&  startWorkTime == null && endWorkTime == null && startApplyTime == null && endApplyTime == null)
@@ -90,11 +90,11 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
                 return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("checkTime",startCheckTime,endCheckTime).orderByAsc("id"));
             }
             else if (startWorkTime != null && endWorkTime != null && startApplyTime != null && endApplyTime != null && startCheckTime==null && endCheckTime== null) {
-                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTime", startWorkTime, endWorkTime).between("applyTime", startApplyTime, endApplyTime).orderByAsc("id"));
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTimeStart", startWorkTime, endWorkTime).between("applyTime", startApplyTime, endApplyTime).orderByAsc("id"));
             }
             else if (startWorkTime != null && endWorkTime != null&&startCheckTime!=null && endCheckTime !=null&&startApplyTime == null && endApplyTime == null)
             {
-                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTime", startWorkTime, endWorkTime).between("checkTime", startCheckTime, endCheckTime).orderByAsc("id"));
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTimeStart", startWorkTime, endWorkTime).between("checkTime", startCheckTime, endCheckTime).orderByAsc("id"));
             }
             else if (startApplyTime != null && endApplyTime != null&&startCheckTime!=null && endCheckTime !=null&&startWorkTime == null && endWorkTime == null)
             {
@@ -102,7 +102,7 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
             }
             else if (startApplyTime != null && endApplyTime != null&&startCheckTime!=null && endCheckTime !=null&&startWorkTime != null && endWorkTime != null)
             {
-                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTime", startWorkTime, endWorkTime).between("applyTime", startApplyTime, endApplyTime).between("checkTime",startCheckTime,endCheckTime).orderByAsc("id"));
+                return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).between("workTimeStart", startWorkTime, endWorkTime).between("applyTime", startApplyTime, endApplyTime).between("checkTime",startCheckTime,endCheckTime).orderByAsc("id"));
             }
         }
         return applyReportMapper.selectPage(new Page<ApplyReport>().setSize(size).setCurrent(page), new QueryWrapper<ApplyReport>().allEq(publice, false).orderByAsc("id"));
@@ -159,6 +159,14 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
         }
 
 
+    }
+
+    @Override
+    public Integer agreeRejectApplyReportForComment(Integer id) {
+        ApplyReport applyReport = new ApplyReport();
+        applyReport.setStatus("已审核");
+        applyReport.setId(id);
+       return applyReportMapper.updateById(applyReport);
     }
 
 }

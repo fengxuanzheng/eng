@@ -17,7 +17,8 @@
         <result column="workPerson" property="workPerson" />
         <result column="safetyPerson" property="safetyPerson" />
         <result column="phone" property="phone" />
-        <result column="workTime" property="workTime" />
+        <result column="workTimeStart" property="workTimeStart" />
+        <result column="workTimeEnd" property="workTimeEnd"/>
         <result column="username" property="username"/>
         <result column="usernameId" property="usernameId"/>
         <result column="usernameDistrict" property="usernameDistrict"/>
@@ -28,7 +29,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, status, equipmentName, workContainer, workWaring, safety, energyType, energySource, energyManagement, workLocation, workPerson, safetyPerson, phone, workTime,username,usernameId,usernameDistrict,applyTime,checkTime,rejectText
+        id, status, equipmentName, workContainer, workWaring, safety, energyType, energySource, energyManagement, workLocation, workPerson, safetyPerson, phone, workTimeStart,workTimeEnd,username,usernameId,usernameDistrict,applyTime,checkTime,rejectText
     </sql>
 
     <select id="getAllUsername" resultType="string">

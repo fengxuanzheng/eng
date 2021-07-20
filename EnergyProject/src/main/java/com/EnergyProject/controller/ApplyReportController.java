@@ -125,5 +125,12 @@ public class ApplyReportController {
         Integer integer = applyreporTervice.sendRejectText(rejectText, id);
         return integer!=null;
     }
+
+    @GetMapping("/agreeRejectApplyReportForComment")
+    public Boolean agreeRejectApplyReportForComment(Integer id)
+    {
+        Integer integer = applyreporTervice.agreeRejectApplyReportForComment(id);
+        return integer!=null;
+    }
 }
 

@@ -68,8 +68,12 @@ public class ApplyReport extends Model<ApplyReport> {
     private Long phone;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
-    @TableField("workTime")
-    private LocalDateTime workTime;
+    @TableField("workTimeStart")
+    private LocalDateTime workTimeStart;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
+    @TableField("workTimeEnd")
+    private LocalDateTime workTimeEnd;
 
     @TableField("applyTime")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
@@ -186,12 +190,20 @@ public class ApplyReport extends Model<ApplyReport> {
         this.phone = phone;
     }
 
-    public LocalDateTime getWorkTime() {
-        return workTime;
+    public LocalDateTime getWorkTimeStart() {
+        return workTimeStart;
     }
 
-    public void setWorkTime(LocalDateTime workTime) {
-        this.workTime = workTime;
+    public void setWorkTimeStart(LocalDateTime workTimeStart) {
+        this.workTimeStart = workTimeStart;
+    }
+
+    public LocalDateTime getWorkTimeEnd() {
+        return workTimeEnd;
+    }
+
+    public void setWorkTimeEnd(LocalDateTime workTimeEnd) {
+        this.workTimeEnd = workTimeEnd;
     }
 
     public String getUsername() {
@@ -266,7 +278,8 @@ public class ApplyReport extends Model<ApplyReport> {
                 ", workPerson='" + workPerson + '\'' +
                 ", safetyPerson='" + safetyPerson + '\'' +
                 ", phone=" + phone +
-                ", workTime=" + workTime +
+                ", workTimeStart=" + workTimeStart +
+                ", workTimeEnd=" + workTimeEnd +
                 ", applyTime=" + applyTime +
                 ", checkTime=" + checkTime +
                 ", rejectText='" + rejectText + '\'' +

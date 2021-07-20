@@ -2,6 +2,7 @@ package com.EnergyProject.controller;
 
 import com.EnergyProject.dao.ZoneDAO;
 import com.EnergyProject.dao.ZoneDAOForNoCallable;
+import com.EnergyProject.pojo.ProAmount;
 import com.EnergyProject.pojo.Zone;
 import com.EnergyProject.server.ProAmountServer;
 import com.EnergyProject.server.ZoneServer;
@@ -171,45 +172,110 @@ public class ZoneController {
     }
 
     @GetMapping("/getNodeZoneData")
-    public List<Zone> getNodeZoneData(Integer node, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime, String selectMode,String selectType)
+    public Map<String,Object> getNodeZoneData(Integer node, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime, String selectMode, String selectType,@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmounr )
     {
+        List<Zone> nodeZoneTotalData=new ArrayList<>();
+        List<ProAmount> proAmountList=null;
+        HashMap<String, Object> outPutHashmap = new HashMap<String, Object>();
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
-        stringObjectHashMap.put("starttime", startTime);
-        stringObjectHashMap.put("eid", node);
-        if (!"minutes".equals(selectMode)){
+            stringObjectHashMap.put("starttime", startTime);
+            stringObjectHashMap.put("eid", node);
+            stringObjectHashMap.put("node",5);
             stringObjectHashMap.put("addtime", 1);
-        }
-        switch (selectMode) {
-            case "hours" -> {
-                LocalDateTime localDateTime = endTime.plusHours(1);
-                stringObjectHashMap.put("endTime", localDateTime);
+            switch (selectMode) {
+                case "hours" -> {
+                    LocalDateTime localDateTime = endTime.plusHours(1);
+                    stringObjectHashMap.put("endTime", localDateTime);
+                }
+                case "days" -> {
+                    LocalDateTime localDateTime1 = endTime.plusDays(1);
+                    stringObjectHashMap.put("endTime", localDateTime1);
+                }
+                case "minutes"->{
+                    LocalDateTime localDateTime = endTime.plusMinutes(6);
+                    stringObjectHashMap.put("endTime",localDateTime);
+                }
             }
-            case "days" -> {
-                LocalDateTime localDateTime1 = endTime.plusDays(1);
-                stringObjectHashMap.put("endTime", localDateTime1);
-            }
-        }
-        List<Zone> nodeZoneTotalData = zoneServer.getNodeZoneTotalData(stringObjectHashMap, selectMode);
-
-        if ("total".equals(selectType))
+        if (!"minutes".equals(selectMode))
         {
-            return nodeZoneTotalData;
+            if (isAmounr)
+            {
+                stringObjectHashMap.put("eid",26);
+                List<Zone> nodeZoneTotalDataForT3 = zoneServer.getNodeZoneTotalData(stringObjectHashMap, selectMode);
+                stringObjectHashMap.put("eid",27);
+                List<Zone> nodeZoneTotalDataForT4 = zoneServer.getNodeZoneTotalData(stringObjectHashMap, selectMode);
+                if (nodeZoneTotalDataForT3.size()!=nodeZoneTotalDataForT4.size())
+                {
+                    log.error("两个集合大小不相等");
+                    throw new RuntimeException("两个集合大小不相等");
+                }
+                if (nodeZoneTotalDataForT3.size()==0 || nodeZoneTotalDataForT4.size()==0)
+                {
+                     outPutHashmap.put("message","数据库无值");
+                     return outPutHashmap;
+                }
+                for (int i=0;i<nodeZoneTotalDataForT3.size();i++)
+                {
+                    Zone zone = nodeZoneTotalDataForT3.get(i);
+                    Zone zoneNext = nodeZoneTotalDataForT4.get(i);
+                    nodeZoneTotalData.add(new Zone(null,zone.gettValue()+zoneNext.gettValue(),zone.gettTime()));
+                }
+                switch (selectMode)
+                {
+                    case "hours" ->{
+                        proAmountList = proAmountServer.getProAmountList(stringObjectHashMap);
+
+                    }
+                    case "days" ->{
+                        proAmountList=proAmountServer.getProAmountListForDay(stringObjectHashMap);
+                    }
+                }
+
+            }
+            else
+            {
+                nodeZoneTotalData= zoneServer.getNodeZoneTotalData(stringObjectHashMap, selectMode);
+            }
         }
         else
         {
-            LocalDateTime lastDataTime=null;
+           nodeZoneTotalData= zoneServer.selectDafultForMininunt(stringObjectHashMap);
+        }
+
+        if ("total".equals(selectType))
+        {
+            outPutHashmap.put("increment",nodeZoneTotalData);
+            return outPutHashmap;
+        }
+        else
+        {
+
             ArrayList<Zone> zones = new ArrayList<>();
             nodeZoneTotalData.forEach(iteam->{
                 zones.add(new Zone(iteam.getEid(),iteam.gettValue(),iteam.gettTime()));
             });
             System.out.println(zones);
-            Zone zone=null;
+
             for (int i=0;i<nodeZoneTotalData.size()-1;i++)
             {
                 zones.get(i).settValue(nodeZoneTotalData.get(i+1).gettValue()-nodeZoneTotalData.get(i).gettValue());
             }
             zones.remove(zones.size()-1);
-            return zones;
+            if (isAmounr)
+            {
+                ArrayList<ProAmount> proAmounts = new ArrayList<>();
+                proAmountList.forEach(iteam->{
+                    proAmounts.add(new ProAmount(iteam.getNode(),iteam.gettValue(),iteam.gettTime()));
+                });
+                for (int i=0;i<proAmountList.size()-1;i++)
+                {
+                    proAmounts.get(i).settValue(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue());
+                }
+                proAmounts.remove(proAmounts.size()-1);
+                outPutHashmap.put("ha",proAmounts);
+            }
+            outPutHashmap.put("main",zones);
+            return outPutHashmap;
         }
 
 

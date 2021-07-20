@@ -13,7 +13,7 @@ public class Zone implements Serializable {
 
     private Integer eid;
     private Integer tValue;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GTM+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
     private LocalDateTime tTime;
 
 

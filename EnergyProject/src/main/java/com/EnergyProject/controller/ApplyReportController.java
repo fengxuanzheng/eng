@@ -5,10 +5,12 @@ import com.EnergyProject.pojo.ApplyReport;
 import com.EnergyProject.server.APPLYREPORTervice;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -131,6 +133,12 @@ public class ApplyReportController {
     {
         Integer integer = applyreporTervice.agreeRejectApplyReportForComment(id);
         return integer!=null;
+    }
+
+    @GetMapping("/getApplyReportOfAmountData")
+    public List<ApplyReport> getApplyReportOfAmountData(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")LocalDateTime endTime)
+    {
+       return applyreporTervice.getApplyReportOfAmountData(startTime,endTime);
     }
 }
 

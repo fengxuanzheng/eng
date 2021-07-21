@@ -4,6 +4,7 @@ import com.EnergyProject.pojo.ApplyReport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -43,4 +44,6 @@ public interface APPLYREPORTervice extends IService<ApplyReport> {
     Integer sendRejectText(Map<String,Object> rejectText, Integer id);
 
     Integer agreeRejectApplyReportForComment(Integer id);
+
+    List<ApplyReport> getApplyReportOfAmountData(LocalDateTime startTime, LocalDateTime endTime);
 }

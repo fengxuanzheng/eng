@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -167,6 +168,11 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
         applyReport.setStatus("已审核");
         applyReport.setId(id);
        return applyReportMapper.updateById(applyReport);
+    }
+
+    @Override
+    public List<ApplyReport> getApplyReportOfAmountData(LocalDateTime startTime, LocalDateTime endTime) {
+      return applyReportMapper.selectList(new QueryWrapper<ApplyReport>().ge("workTimeStart",startTime).le("workTimeEnd",endTime).eq("status","已审核").orderByAsc("id"));
     }
 
 }

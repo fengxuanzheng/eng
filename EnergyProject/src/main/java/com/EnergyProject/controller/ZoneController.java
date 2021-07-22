@@ -22,7 +22,11 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @RestController
 @Slf4j
@@ -38,6 +42,8 @@ public class ZoneController {
     private ZoneDAOForNoCallable zoneDAOForNoCallable;
     private Map<String,Object> frontEndData=new HashMap<>();
     private Map<String,Object> yesterdayFrontEndData=new HashMap<>();
+
+    private AtomicInteger atomicInteger=new AtomicInteger();
     /*@GetMapping("/getYesterdayData")
     public Map<String, Object> getYesterdayData(@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmount) throws ParseException {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
@@ -172,7 +178,7 @@ public class ZoneController {
     }
 
     @GetMapping("/getNodeZoneData")
-    public Map<String,Object> getNodeZoneData(Integer node, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime, String selectMode, String selectType,@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmounr )
+    public Map<String,Object> getNodeZoneData(Integer node, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime, String selectMode, String selectType,@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmounr,@RequestParam(value = "isNoProductionSelect",defaultValue = "false") Boolean isNoProductionSelect,@RequestParam(value = "nonProductionValueLimit",defaultValue = "150") Integer nonProductionValueLimit )
     {
         List<Zone> nodeZoneTotalData=new ArrayList<>();
         List<ProAmount> proAmountList=null;
@@ -182,20 +188,7 @@ public class ZoneController {
             stringObjectHashMap.put("eid", node);
             stringObjectHashMap.put("node",5);
             stringObjectHashMap.put("addtime", 1);
-            switch (selectMode) {
-                case "hours" -> {
-                    LocalDateTime localDateTime = endTime.plusHours(1);
-                    stringObjectHashMap.put("endTime", localDateTime);
-                }
-                case "days" -> {
-                    LocalDateTime localDateTime1 = endTime.plusDays(1);
-                    stringObjectHashMap.put("endTime", localDateTime1);
-                }
-                case "minutes"->{
-                    LocalDateTime localDateTime = endTime.plusMinutes(6);
-                    stringObjectHashMap.put("endTime",localDateTime);
-                }
-            }
+            stringObjectHashMap.put("endTime",endTime);
         if (!"minutes".equals(selectMode))
         {
             if (isAmounr)
@@ -272,6 +265,59 @@ public class ZoneController {
                     proAmounts.get(i).settValue(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue());
                 }
                 proAmounts.remove(proAmounts.size()-1);
+                if (isNoProductionSelect)
+                {
+                    atomicInteger.set(0);
+                    ArrayList<ProAmount> filterProAmountList=new ArrayList<>();
+                    ArrayList<ProAmount> finallFilterProAmountList=new ArrayList<>();
+                    if (zones.size()!=proAmounts.size()&&zones.size()!=0&&proAmounts.size()!=0)
+                    {
+                        switch (selectMode)
+                        {
+                            case "hours"->{
+                                zones.forEach(item->{
+                                    int dayOfMonth = item.gettTime().getDayOfMonth();
+                                    int hour = item.gettTime().getHour();
+                                    filterProAmountList.addAll(proAmounts.stream().filter(itemAmounts->{
+                                        int dayOfMonthForAmount = itemAmounts.gettTime().getDayOfMonth();
+                                        int dayOfMonthForAmountHour = itemAmounts.gettTime().getHour();
+                                        return dayOfMonth==dayOfMonthForAmount && hour==dayOfMonthForAmountHour;
+                                    }).collect(Collectors.toList()));
+                                });
+                            }
+                            case "days"->{
+                                zones.forEach(item->{
+                                    int monthValue = item.gettTime().getMonthValue();
+                                    int dayOfMonth = item.gettTime().getDayOfMonth();
+                                    filterProAmountList.addAll(proAmounts.stream().filter(itemAmounts->{
+                                        int monthValueForAmount = itemAmounts.gettTime().getMonthValue();
+                                        int dayOfMonthForAmountHour = itemAmounts.gettTime().getDayOfMonth();
+                                        return dayOfMonth==dayOfMonthForAmountHour && monthValue==monthValueForAmount;
+                                    }).collect(Collectors.toList()));
+                                });
+                            }
+                        }
+
+                    }
+                    if (filterProAmountList.size()==0)
+                    {
+                        finallFilterProAmountList.addAll(proAmounts);
+                    }
+                    else
+                    {
+                        finallFilterProAmountList.addAll(filterProAmountList);
+                    }
+                    List<Zone> collect = zones.stream().filter(zoneItem -> {
+                        int i = atomicInteger.get();
+                        atomicInteger.getAndIncrement();
+                        return finallFilterProAmountList.get(i).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                    }).collect(Collectors.toList());
+                    IntSummaryStatistics collectOfTotal = zones.stream().collect(Collectors.summarizingInt(Zone::gettValue));
+                    outPutHashmap.put("main",collect);
+                    outPutHashmap.put("totalSum",collectOfTotal.getSum());
+                    return outPutHashmap;
+
+                }
                 outPutHashmap.put("ha",proAmounts);
             }
             outPutHashmap.put("main",zones);

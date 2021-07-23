@@ -46,4 +46,6 @@ public interface APPLYREPORTervice extends IService<ApplyReport> {
     Integer agreeRejectApplyReportForComment(Integer id);
 
     List<ApplyReport> getApplyReportOfAmountData(LocalDateTime startTime, LocalDateTime endTime);
+
+    List<ApplyReport> getFirstThreeDaysOfApplyReportOfUnReviewed();
 }

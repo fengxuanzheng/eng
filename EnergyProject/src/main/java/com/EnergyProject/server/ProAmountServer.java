@@ -27,4 +27,9 @@ public class ProAmountServer {
     {
        return proAmountDAO.getSingleProAmount(node);
     }
+
+    public List<Integer> getAllProAmountNode()
+    {
+        return proAmountDAO.getAllProAmountNode();
+    }
 }

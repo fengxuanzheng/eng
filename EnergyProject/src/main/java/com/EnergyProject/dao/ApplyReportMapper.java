@@ -16,4 +16,5 @@ import java.util.List;
 public interface ApplyReportMapper extends BaseMapper<ApplyReport> {
 
     List<String> getAllUsername();
+    List<ApplyReport> getFirstThreeDaysOfApplyReportOfUnReviewed();
 }

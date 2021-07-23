@@ -140,5 +140,26 @@ public class ApplyReportController {
     {
        return applyreporTervice.getApplyReportOfAmountData(startTime,endTime);
     }
+
+    @GetMapping("/totalDataApplyReport")
+    public List<ApplyReport> totalDataApplyReport()
+    {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startTime = LocalDateTime.of(2021, 6, 27, 0, 0, 0);
+        return applyreporTervice.getApplyReportOfAmountData(startTime, startTime.plusDays(1));
+    }
+    @GetMapping("/getFirstThreeDaysOfApplyReport")
+    public List<ApplyReport> getFirstThreeDaysOfApplyReport()
+    {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastThreeDayStartTime = now.plusDays(-3);
+        return applyreporTervice.getApplyReportOfAmountData(lastThreeDayStartTime,now.plusDays(-1));
+    }
+
+    @GetMapping("/getFirstThreeDaysOfApplyReportOfUnReviewed")
+    public List<ApplyReport> getFirstThreeDaysOfApplyReportOfUnReviewed()
+    {
+        return applyreporTervice.getFirstThreeDaysOfApplyReportOfUnReviewed();
+    }
 }
 

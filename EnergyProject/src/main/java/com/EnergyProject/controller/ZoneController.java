@@ -94,10 +94,10 @@ public class ZoneController {
         int year = localDateTime.getYear();
         int monthValue = localDateTime.getMonthValue();
         int dayOfMonth = localDateTime.getDayOfMonth();
-        zoneServer.handlerDateOfAmount(frontEndData,year,6,28,isTotal,selectMode,null);
+        zoneServer.handlerDateOfAmount(frontEndData,year,6,27,isTotal,selectMode,null);
         if (isAmount)
         {
-            zoneServer.hoursAmount(frontEndData,year,6,28,selectMode,isTotal,5);
+            zoneServer.hoursAmount(frontEndData,year,6,27,selectMode,isTotal,5);
         }
 
         return frontEndData;
@@ -121,11 +121,15 @@ public class ZoneController {
         List<Zone> zoneYesterday = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth(), localDateTime.getMonthValue(), localDateTime.getYear());
         List<Zone> zoneBeforeDay = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth()-1, localDateTime.getMonthValue(), localDateTime.getYear());
         List<Zone> zoneLastMonth = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth(), localDateTime.getMonthValue()-1, localDateTime.getYear());
+        if (zoneYesterday.size()!=0&&zoneBeforeDay.size()!=0&&zoneLastMonth.size()!=0)
+        {
+
+        }
         IntSummaryStatistics collectYesterday = zoneYesterday.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         IntSummaryStatistics collectBeforeDay = zoneBeforeDay.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         IntSummaryStatistics collectLastMonth = zoneLastMonth.stream().collect(Collectors.summarizingInt(Zone::gettValue));
-        List<Zone> collectFiler = zoneYesterday.stream().filter(value -> value.getEid() != 27).collect(Collectors.toList());
-        collectFiler.add(new Zone(null,(int) collectYesterday.getSum(),collectFiler.get(0).gettTime()));
+        List<Zone> collectFiler = new ArrayList<>();
+        collectFiler.add(new Zone(null,(int) collectYesterday.getSum(),zoneYesterday.size()!=0?zoneYesterday.get(0).gettTime():null));
         Double beforeDayPercentage=null;
         Double lastMonthPercentage=null;
         if (collectYesterday.getSum()!=0 && collectBeforeDay.getSum()!=0)
@@ -175,6 +179,30 @@ public class ZoneController {
     public List<Integer> getZoneAllNode()
     {
        return zoneServer.getZoneAllNode();
+    }
+
+    @GetMapping("/getEastEnergyConsumptionDistributed")
+    public List<Zone> getEastEnergyConsumptionDistributed()
+    {
+        LocalDateTime now = LocalDateTime.now();
+       return zoneServer.getselectTotalZoneForYesterday(27,6,2021);
+    }
+    @GetMapping("/getInPutSingleAreaEnergyData")
+    public Map<String,Object> getInPutSingleAreaEnergyData(String areaType)
+    {
+        LocalDateTime now = LocalDateTime.now();
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        stringObjectHashMap.put("starttime",LocalDateTime.of(2021,6,27,0,0,0));
+        stringObjectHashMap.put("addtime",1);
+        stringObjectHashMap.put("endTime",LocalDateTime.of(2021,6,28,0,0,0));
+        if ("T3".equals(areaType))
+        {
+            stringObjectHashMap.put("eid",26);
+        }
+        else {
+            stringObjectHashMap.put("eid",27);
+        }
+        return null;
     }
 
     @GetMapping("/getNodeZoneData")
@@ -237,7 +265,7 @@ public class ZoneController {
 
         if ("total".equals(selectType))
         {
-            outPutHashmap.put("increment",nodeZoneTotalData);
+            outPutHashmap.put("main",nodeZoneTotalData);
             return outPutHashmap;
         }
         else

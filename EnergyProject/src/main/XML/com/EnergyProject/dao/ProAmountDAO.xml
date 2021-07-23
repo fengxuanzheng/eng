@@ -30,4 +30,7 @@
     <select id="getSingleProAmount" resultType="com.EnergyProject.pojo.ProAmount">
         select TOP 1 node,t_value,t_time from ProAmount where node=#{node} order by t_time desc
     </select>
+    <select id="getAllProAmountNode" resultType="java.lang.Integer">
+        select distinct node from ProAmount where node is not null
+    </select>
 </mapper>

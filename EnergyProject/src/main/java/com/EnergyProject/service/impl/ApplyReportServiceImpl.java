@@ -175,4 +175,9 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
       return applyReportMapper.selectList(new QueryWrapper<ApplyReport>().ge("workTimeStart",startTime).le("workTimeEnd",endTime).eq("status","已审核").orderByAsc("id"));
     }
 
+    @Override
+    public List<ApplyReport> getFirstThreeDaysOfApplyReportOfUnReviewed() {
+        return applyReportMapper.getFirstThreeDaysOfApplyReportOfUnReviewed();
+    }
+
 }

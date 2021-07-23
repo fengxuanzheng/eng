@@ -339,7 +339,7 @@ public class ZoneServer {
         return zoneDAO.selectTotalZone();
     }
 
-    public List<Zone> getzonelistForCUROS(Map<String,Object> intoParament)
+    public List<Zone> getzonelistForCUROS()
     {
                 return zoneDAO.getzonelistForCUROS(intoParament);
     }
@@ -393,18 +393,23 @@ public class ZoneServer {
                 proAmountList = proAmountServer.getProAmountListForDay(stringObjectHashMap);
             }
         }
-
-
-
-        proAmountList.forEach(iteam->{
-            proAmounts.add(new ProAmount(iteam.getNode(),iteam.gettValue(),iteam.gettTime()));
-        });
-        for (int i=0;i<proAmounts.size()-1;i++)
+        if (proAmountList.size()!=0)
         {
-            proAmounts.get(i).settValue(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue());
+            proAmountList.forEach(iteam->{
+                proAmounts.add(new ProAmount(iteam.getNode(),iteam.gettValue(),iteam.gettTime()));
+            });
+            for (int i=0;i<proAmounts.size()-1;i++)
+            {
+                proAmounts.get(i).settValue(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue());
+            }
+            proAmounts.remove(proAmounts.size()-1);
+            sendData.put("ha",proAmounts);
         }
-        proAmounts.remove(proAmounts.size()-1);
-        sendData.put("ha",proAmounts);
+        else
+        {
+         sendData.put("ha",null);
+        }
+
     }
 
     public void handlerDateOfAmount(Map<String,Object>sendData,Integer year,Integer monthValue,@Nullable Integer dayOfMonth,Boolean isTotal,String selectMode,@Nullable Integer eid)
@@ -484,15 +489,23 @@ public class ZoneServer {
         }
 
         List<Zone> zones = new LinkedList<>();
-        selectData.forEach(iteam->{
-            zones.add(new Zone(iteam.getEid(),iteam.gettValue(),iteam.gettTime()));
-        });
-        for (int i=0;i<zones.size()-1;i++)
+        if (selectData.size()!=0)
         {
-           zones.get(i).settValue(selectData.get(i+1).gettValue()-selectData.get(i).gettValue());
+            selectData.forEach(iteam->{
+                zones.add(new Zone(iteam.getEid(),iteam.gettValue(),iteam.gettTime()));
+            });
+            for (int i=0;i<zones.size()-1;i++)
+            {
+                zones.get(i).settValue(selectData.get(i+1).gettValue()-selectData.get(i).gettValue());
+            }
+            zones.remove(zones.size()-1);
+            sendData.put("main",zones);
         }
-        zones.remove(zones.size()-1);
-        sendData.put("main",zones);
+        else
+        {
+            sendData.put("main",null);
+        }
+
     }
 
 }

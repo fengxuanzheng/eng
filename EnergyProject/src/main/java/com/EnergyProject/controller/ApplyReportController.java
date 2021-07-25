@@ -140,6 +140,22 @@ public class ApplyReportController {
     {
        return applyreporTervice.getApplyReportOfAmountData(startTime,endTime);
     }
+    @GetMapping("/getNowApplyReportOfSingle")
+    public List<ApplyReport> getNowApplyReportOfSingle(@RequestParam(value = "selectMode",defaultValue = "hours") String selectMode)
+    {
+        LocalDateTime now = LocalDateTime.now();
+        if ("hours".equals(selectMode))
+        {
+            LocalDateTime nextNow = now.plusDays(1);
+            return applyreporTervice.getApplyReportOfAmountData(LocalDateTime.of(2021,6,27,0,0,0),LocalDateTime.of(2021,6,28,0,0,0));
+        }
+        else
+        {
+            return applyreporTervice.getApplyReportOfAmountData(LocalDateTime.of(2021,6,1,0,0,0),LocalDateTime.of(2021,6,28,0,0,0));
+        }
+
+
+    }
 
     @GetMapping("/totalDataApplyReport")
     public List<ApplyReport> totalDataApplyReport()

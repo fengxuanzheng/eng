@@ -249,11 +249,19 @@ public class ZoneServer {
         return zoneDAOForEhcache.selectZoneForSpecificTime(day, month, year,eid);
 
     }
-    public List<Zone> getselectTotalZoneForYesterday(Integer day,Integer month,Integer year)
+    public List<Zone> getselectTotalZoneForYesterday(Integer day,Integer month , Integer year)
     {
-       return zoneDAOForEhcache.selectTotalZoneForYesterday( day, month, year);
+        return zoneDAOForEhcache.getselectTotalZoneForYesterday(day,month,year);
     }
 
+    public List<Zone> getselectTotalZoneForCurrentTime(Map<String,Object> stringObjectMap)
+    {
+        return zoneDAOForEhcache.selectTotalZoneForCurrentTime(stringObjectMap);
+    }
+    public List<Zone> getCurrentMonthFirstDayForZoneData(Integer month,Integer year)
+    {
+        return zoneDAOForEhcache.getCurrentMonthFirstDayForZoneData(month,year);
+    }
 
     public List<Integer> getZoneAllNode(){
        return zoneDAOForEhcache.getZoneAllNode();
@@ -339,7 +347,7 @@ public class ZoneServer {
         return zoneDAO.selectTotalZone();
     }
 
-    public List<Zone> getzonelistForCUROS()
+    public List<Zone> getzonelistForCUROS(Map<String,Object> intoParament)
     {
                 return zoneDAO.getzonelistForCUROS(intoParament);
     }

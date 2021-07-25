@@ -11,7 +11,16 @@
     <select id="selectDafultForMininunt" resultType="com.EnergyProject.pojo.Zone">
         select  eid,t_value,t_time from zone where eid=#{eid} and t_time >= #{starttime} and t_time &lt;= #{endTime} ORDER BY t_time
     </select>
-    <select id="selectTotalZoneForYesterday" resultType="com.EnergyProject.pojo.Zone">
-        SELECT top 2  eid,t_time,t_value from zone where DAY(t_time)=#{day}  AND MONTH(t_time)=#{month} AND YEAR(t_time)=#{year} and eid in(26,27) ORDER BY t_time DESC
+    <select id="selectTotalZoneForCurrentTime" resultType="com.EnergyProject.pojo.Zone">
+        SELECT eid,t_time,t_value FROM (SELECT top 2 eid,t_time,t_value from zone where DAY(t_time)=#{startDay}  AND MONTH(t_time)=#{startMonth} AND YEAR(t_time)=#{startYear} and eid in(26,27)  ORDER BY t_time) as a1
+        UNION
+        SELECT eid,t_time,t_value FROM (SELECT top 2 eid,t_time,t_value  from zone where DAY(t_time)=#{endDay}  AND MONTH(t_time)=#{endMonth} AND YEAR(t_time)=#{endYear} and eid in(26,27) ORDER BY t_time DESC) as a2 ORDER BY t_time
+
+    </select>
+    <select id="getselectTotalZoneForYesterday" resultType="com.EnergyProject.pojo.Zone">
+      SELECT top 2 eid,t_time,t_value from zone where DAY(t_time)=#{day}  AND MONTH(t_time)=#{month} AND YEAR(t_time)=#{year} and eid in(26,27)  ORDER BY t_time DESC
+    </select>
+    <select id="getCurrentMonthFirstDayForZoneData" resultType="com.EnergyProject.pojo.Zone">
+        select TOP 2 eid,t_time,t_value from zone where  MONTH(t_time)=#{month} AND YEAR(t_time)=#{year} and eid in(26,27)  ORDER BY t_time
     </select>
 </mapper>

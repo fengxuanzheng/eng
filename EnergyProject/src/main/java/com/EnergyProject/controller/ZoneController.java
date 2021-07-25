@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.Period;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -182,19 +184,76 @@ public class ZoneController {
     }
 
     @GetMapping("/getEastEnergyConsumptionDistributed")
-    public List<Zone> getEastEnergyConsumptionDistributed()
+    public List<Zone> getEastEnergyConsumptionDistributed(@RequestParam(value ="selectMode",defaultValue = "hours") String selectMode)
     {
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
-       return zoneServer.getselectTotalZoneForYesterday(27,6,2021);
+        stringObjectHashMap.put("endDay",27);
+        stringObjectHashMap.put("endMonth",6);
+        stringObjectHashMap.put("endYear",now.getYear());
+        ArrayList<Zone> ouPutZoneList = new ArrayList<>();
+        List<Zone> zones=null;
+        if ("hours".equals(selectMode))
+        {
+            stringObjectHashMap.put("startDay",27);
+            stringObjectHashMap.put("startMonth",6);
+            stringObjectHashMap.put("startYear",now.getYear());
+
+             zones = zoneServer.getselectTotalZoneForCurrentTime(stringObjectHashMap);
+        }
+        else
+        {
+            List<Zone> currentMonthFirstDayForZoneData = zoneServer.getCurrentMonthFirstDayForZoneData(6, now.getYear());
+            if (currentMonthFirstDayForZoneData.size()==2)
+            {
+
+                //stringObjectHashMap.put("startDay",currentMonthFirstDayForZoneData.get(0).gettTime().getDayOfMonth());
+                stringObjectHashMap.put("startDay",26);
+                stringObjectHashMap.put("startMonth",6);
+                stringObjectHashMap.put("startYear",now.getYear());
+                zones = zoneServer.getselectTotalZoneForCurrentTime(stringObjectHashMap);
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+        if (zones.size()==4)
+        {
+            List<Zone> collectForT3 = zones.stream().filter(item -> {
+            return item.getEid() == 26;
+        }).collect(Collectors.toList());
+            List<Zone> collectForT4 = zones.stream().filter(item -> {
+                return item.getEid() == 27;
+            }).collect(Collectors.toList());
+            Zone zoneT3 = new Zone(collectForT3.get(0).getEid(), collectForT3.get(1).gettValue() - collectForT3.get(0).gettValue(), collectForT3.get(0).gettTime());
+            Zone zoneT4 = new Zone(collectForT4.get(0).getEid(), collectForT4.get(1).gettValue() - collectForT4.get(0).gettValue(), collectForT4.get(0).gettTime());
+            ouPutZoneList.add(zoneT3);
+            ouPutZoneList.add(zoneT4);
+            return ouPutZoneList;
+        }
+       return null;
     }
     @GetMapping("/getInPutSingleAreaEnergyData")
-    public Map<String,Object> getInPutSingleAreaEnergyData(String areaType)
+    public Map<String,Object> getInPutSingleAreaEnergyData(String areaType,@RequestParam(value = "selectMode",defaultValue = "hours") String selectMode)
     {
+        ArrayList<Zone> filterZones = new ArrayList<>();
+        HashMap<String, Object> ouPutHashMap = new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
-        stringObjectHashMap.put("starttime",LocalDateTime.of(2021,6,27,0,0,0));
         stringObjectHashMap.put("addtime",1);
-        stringObjectHashMap.put("endTime",LocalDateTime.of(2021,6,28,0,0,0));
+        if ("hours".equals(selectMode))
+        {
+            stringObjectHashMap.put("starttime",LocalDateTime.of(2021,6,27,0,0,0));
+            stringObjectHashMap.put("endTime",LocalDateTime.of(2021,6,28,0,0,0));
+        }
+        else
+        {
+            stringObjectHashMap.put("starttime",LocalDateTime.of(2021,6,1,0,0,0));
+            stringObjectHashMap.put("endTime",LocalDateTime.of(2021,7,1,0,0,0));
+        }
+
         if ("T3".equals(areaType))
         {
             stringObjectHashMap.put("eid",26);
@@ -202,7 +261,22 @@ public class ZoneController {
         else {
             stringObjectHashMap.put("eid",27);
         }
-        return null;
+        List<Zone> zones = zoneServer.getNodeZoneTotalData(stringObjectHashMap, selectMode);
+        if (zones.size()!=0)
+        {
+            zones.forEach(item->{
+                filterZones.add(new Zone(item.getEid(),item.gettValue(),item.gettTime()));
+            });
+            for (int i=0;i<zones.size()-1;i++)
+            {
+                filterZones.get(i).settValue(zones.get(i+1).gettValue()-zones.get(i).gettValue());
+            }
+            filterZones.remove(filterZones.size()-1);
+            ouPutHashMap.put("main",filterZones);
+            return ouPutHashMap;
+        }
+        ouPutHashMap.put("main",null);
+        return ouPutHashMap;
     }
 
     @GetMapping("/getNodeZoneData")
@@ -353,5 +427,110 @@ public class ZoneController {
         }
 
 
+    }
+
+    @GetMapping("/selectNoProductionOfMonth")
+    public Map<String,Object> selectNoProductionOfMonth( @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime,Integer nonProductionValueLimit)
+    {
+        int diffDay = endTime.compareTo(startTime);
+        HashMap<String, Object> localDateTimeObjectHashMap = new HashMap<>();
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        Long totalEnerngy=0L;
+        Long totalNoProductionEnergy=0L;
+        ArrayList<Zone> FinallOutPutZoneList = new ArrayList<>();
+        for (int i=0;i<=diffDay;i++)
+        {
+            atomicInteger.set(0);
+            ArrayList<Zone> totalZoneData = new ArrayList<>();
+            ArrayList<Zone> finallTotalZoneData = new ArrayList<>();
+            ArrayList<ProAmount> finallProAmounts = new ArrayList<>();
+            stringObjectHashMap.put("starttime",startTime);
+            stringObjectHashMap.put("addtime",1);
+            stringObjectHashMap.put("eid",26);
+            stringObjectHashMap.put("endTime",startTime.plusDays(1));
+            List<Zone> zonesT3 = zoneServer.getzonelistForCUROS(stringObjectHashMap);
+            stringObjectHashMap.put("eid",27);
+            List<Zone> zonesT4 = zoneServer.getzonelistForCUROS(stringObjectHashMap);
+            for (int j=0;j<zonesT3.size();j++)
+            {
+                totalZoneData.add(new Zone(null,zonesT3.get(j).gettValue()+zonesT4.get(j).gettValue(),zonesT3.get(j).gettTime()));
+            }
+            stringObjectHashMap.put("node",5);
+            List<ProAmount> proAmountListForDay = proAmountServer.getProAmountList(stringObjectHashMap);
+            if (proAmountListForDay.size()!=0)
+            {
+                proAmountListForDay.forEach(item->{
+                    finallProAmounts.add(new ProAmount(null,item.gettValue(),item.gettTime()));
+                });
+                for (int g=0;g<proAmountListForDay.size()-1;g++)
+                {
+                    finallProAmounts.get(g).settValue(proAmountListForDay.get(g+1).gettValue()-proAmountListForDay.get(g).gettValue());
+                }
+                finallProAmounts.remove(finallProAmounts.size()-1);
+            }
+            else
+            {
+                break;
+            }
+            if (totalZoneData.size()!=0)
+            {
+                totalZoneData.forEach(item->{
+                    finallTotalZoneData.add(new Zone(null,item.gettValue(),item.gettTime()));
+                });
+                for (int c=0;c<totalZoneData.size()-1;c++)
+                {
+                    finallTotalZoneData.get(0).settValue(totalZoneData.get(c+1).gettValue()-totalZoneData.get(c).gettValue());
+                }
+                finallTotalZoneData.remove(finallTotalZoneData.size()-1);
+            }
+            else
+            {
+                break;
+            }
+
+            ArrayList<ProAmount> filterProAmountList=new ArrayList<>();
+            ArrayList<ProAmount> finallFilterProAmountList=new ArrayList<>();
+            if (finallTotalZoneData.size()!=finallProAmounts.size()&&finallTotalZoneData.size()!=0&&finallProAmounts.size()!=0)
+            {
+                finallTotalZoneData.forEach(item->{
+                            int monthValue = item.gettTime().getMonthValue();
+                            int dayOfMonth = item.gettTime().getDayOfMonth();
+                            filterProAmountList.addAll(finallProAmounts.stream().filter(itemAmounts->{
+                                int monthValueForAmount = itemAmounts.gettTime().getMonthValue();
+                                int dayOfMonthForAmountHour = itemAmounts.gettTime().getDayOfMonth();
+                                return dayOfMonth==dayOfMonthForAmountHour && monthValue==monthValueForAmount;
+                            }).collect(Collectors.toList()));
+                        });
+
+
+
+            }
+            if (filterProAmountList.size()==0)
+            {
+                finallFilterProAmountList.addAll(finallProAmounts);
+            }
+            else
+            {
+                finallFilterProAmountList.addAll(filterProAmountList);
+            }
+
+            List<Zone> collect = finallTotalZoneData.stream().filter(zoneItem -> {
+                int index = atomicInteger.get();
+                atomicInteger.getAndIncrement();
+                return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+            }).collect(Collectors.toList());
+            IntSummaryStatistics collectOfTotal = finallTotalZoneData.stream().collect(Collectors.summarizingInt(Zone::gettValue));
+            totalEnerngy+=collectOfTotal.getSum();
+            IntSummaryStatistics collectForNoProduction = collect.stream().collect(Collectors.summarizingInt(Zone::gettValue));
+            int sum = (int)collectForNoProduction.getSum();
+            totalNoProductionEnergy+=sum;
+            Zone Finallzone = new Zone(null, sum, startTime);
+            FinallOutPutZoneList.add(Finallzone);
+            startTime=startTime.plusDays(1);
+        }
+        localDateTimeObjectHashMap.put("main",FinallOutPutZoneList);
+        localDateTimeObjectHashMap.put("totalEnergy",totalEnerngy);
+        localDateTimeObjectHashMap.put("totalEnergyOfNoProduction",totalNoProductionEnergy);
+        return localDateTimeObjectHashMap;
     }
 }

@@ -23,4 +23,15 @@
     <select id="getCurrentMonthFirstDayForZoneData" resultType="com.EnergyProject.pojo.Zone">
         select TOP 2 eid,t_time,t_value from zone where  MONTH(t_time)=#{month} AND YEAR(t_time)=#{year} and eid in(26,27)  ORDER BY t_time
     </select>
+    <select id="geteveryDayFirstTimeEnergy" resultType="com.EnergyProject.pojo.Zone">
+        WITH orderIndex as
+                 (
+                     SELECT ROW_NUMBER () over(ORDER BY t_time,eid) as numIndex, eid,t_value,t_time from zone where t_time BETWEEN #{startTime} and #{endTime} and eid in(26,27)
+
+                 ),countindex as(
+            SELECT count(numIndex) as total from orderIndex
+        )
+        SELECT eid, t_value,t_time FROM orderIndex
+        where numIndex in(1,2) or numIndex in((SELECT total from countindex)-1,(SELECT total from countindex))
+    </select>
 </mapper>

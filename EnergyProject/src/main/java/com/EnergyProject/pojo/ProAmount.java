@@ -2,9 +2,10 @@ package com.EnergyProject.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class ProAmount {
+public class ProAmount implements Serializable {
     private Integer node;
     private Integer tValue;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")

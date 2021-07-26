@@ -8,6 +8,7 @@ import com.EnergyProject.pojo.Zone;
 
 import com.EnergyProject.utils.SelectMode;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -338,6 +339,11 @@ public class ZoneServer {
     public List<Zone> selectDafultForMininunt(Map<String,Object> stringObjectMap){
        return zoneDAOForEhcache.selectDafultForMininunt(stringObjectMap);
     }
+    public List<Zone> geteveryDayFirstTimeEnergy(LocalDateTime startTime,LocalDateTime endTime)
+    {
+        return zoneDAOForEhcache.geteveryDayFirstTimeEnergy(startTime,endTime);
+
+    }
     public Zone getSelectSingleZone(Integer eid)
     {
        return zoneDAO.selectSingleZone(eid);
@@ -350,6 +356,10 @@ public class ZoneServer {
     public List<Zone> getzonelistForCUROS(Map<String,Object> intoParament)
     {
                 return zoneDAO.getzonelistForCUROS(intoParament);
+    }
+    public List<Zone> getFinallgetvaluediffonCUROSOfTotal(Map<String,Object> intoParament)
+    {
+        return zoneDAO.getzonelistForCUROSOfTotal(intoParament);
     }
     public List<Zone> getzonelistForCUROSForDay(Map<String,Object> intoParament)
     {

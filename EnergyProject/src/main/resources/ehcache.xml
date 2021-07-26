@@ -9,8 +9,8 @@
    maxElementsOnDisk="0"
    eternal="true"
    overflowToDisk="true" 
-   timeToIdleSeconds="1200"
-   timeToLiveSeconds="1200"
+   timeToIdleSeconds="0"
+   timeToLiveSeconds="0"
    diskPersistent="true"
    diskExpiryThreadIntervalSeconds="120"
    memoryStoreEvictionPolicy="LRU">

@@ -146,12 +146,11 @@ public class ApplyReportController {
         LocalDateTime now = LocalDateTime.now();
         if ("hours".equals(selectMode))
         {
-            LocalDateTime nextNow = now.plusDays(1);
-            return applyreporTervice.getApplyReportOfAmountData(LocalDateTime.of(2021,6,27,0,0,0),LocalDateTime.of(2021,6,28,0,0,0));
+            return applyreporTervice.getApplyReportOfAmountData(LocalDateTime.of(now.getYear(),now.getMonthValue(),now.getDayOfMonth(),0,0,0),LocalDateTime.of(now.getYear(),now.getMonthValue(),now.getDayOfMonth()+1,0,0,0));
         }
         else
         {
-            return applyreporTervice.getApplyReportOfAmountData(LocalDateTime.of(2021,6,1,0,0,0),LocalDateTime.of(2021,6,28,0,0,0));
+            return applyreporTervice.getApplyReportOfAmountData(LocalDateTime.of(now.getYear(),now.getMonthValue(),1,0,0,0),LocalDateTime.of(now.getYear(),now.getMonthValue()+1,28,0,0,0));
         }
 
 
@@ -161,7 +160,7 @@ public class ApplyReportController {
     public List<ApplyReport> totalDataApplyReport()
     {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startTime = LocalDateTime.of(2021, 6, 27, 0, 0, 0);
+        LocalDateTime startTime = LocalDateTime.of(now.getYear(), now.getMonthValue(), now.getDayOfMonth(), 0, 0, 0);
         return applyreporTervice.getApplyReportOfAmountData(startTime, startTime.plusDays(1));
     }
     @GetMapping("/getFirstThreeDaysOfApplyReport")

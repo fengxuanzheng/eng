@@ -1,6 +1,8 @@
 package com.EnergyProject.controller;
 
+import com.EnergyProject.dao.ProAmountDAO;
 import com.EnergyProject.dao.ZoneDAO;
+import com.EnergyProject.dao.ZoneDAOForEhcache;
 import com.EnergyProject.dao.ZoneDAOForNoCallable;
 import com.EnergyProject.pojo.ProAmount;
 import com.EnergyProject.pojo.Zone;
@@ -9,6 +11,9 @@ import com.EnergyProject.server.ZoneServer;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,6 +51,15 @@ public class ZoneController {
     private Map<String,Object> yesterdayFrontEndData=new HashMap<>();
 
     private AtomicInteger atomicInteger=new AtomicInteger();
+    private List<Zone> storageTotalEnergy=new ArrayList<>();
+    @Autowired
+    private SqlSessionFactory sqlSessionFactory;
+
+    private ArrayList<Zone> totalZoneData = new ArrayList<>();
+    private ArrayList<Zone> finallTotalZoneData = new ArrayList<>();
+    private ArrayList<ProAmount> finallProAmounts = new ArrayList<>();
+    private ArrayList<ProAmount> filterProAmountList=new ArrayList<>();
+     private ArrayList<ProAmount> finallFilterProAmountList=new ArrayList<>();
     /*@GetMapping("/getYesterdayData")
     public Map<String, Object> getYesterdayData(@RequestParam(value = "isAmount",defaultValue ="false") Boolean isAmount) throws ParseException {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
@@ -96,10 +110,10 @@ public class ZoneController {
         int year = localDateTime.getYear();
         int monthValue = localDateTime.getMonthValue();
         int dayOfMonth = localDateTime.getDayOfMonth();
-        zoneServer.handlerDateOfAmount(frontEndData,year,6,27,isTotal,selectMode,null);
+        zoneServer.handlerDateOfAmount(frontEndData,year,monthValue,dayOfMonth,isTotal,selectMode,null);
         if (isAmount)
         {
-            zoneServer.hoursAmount(frontEndData,year,6,27,selectMode,isTotal,5);
+            zoneServer.hoursAmount(frontEndData,year,monthValue,dayOfMonth,selectMode,isTotal,5);
         }
 
         return frontEndData;
@@ -123,10 +137,7 @@ public class ZoneController {
         List<Zone> zoneYesterday = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth(), localDateTime.getMonthValue(), localDateTime.getYear());
         List<Zone> zoneBeforeDay = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth()-1, localDateTime.getMonthValue(), localDateTime.getYear());
         List<Zone> zoneLastMonth = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth(), localDateTime.getMonthValue()-1, localDateTime.getYear());
-        if (zoneYesterday.size()!=0&&zoneBeforeDay.size()!=0&&zoneLastMonth.size()!=0)
-        {
 
-        }
         IntSummaryStatistics collectYesterday = zoneYesterday.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         IntSummaryStatistics collectBeforeDay = zoneBeforeDay.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         IntSummaryStatistics collectLastMonth = zoneLastMonth.stream().collect(Collectors.summarizingInt(Zone::gettValue));
@@ -188,28 +199,28 @@ public class ZoneController {
     {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
-        stringObjectHashMap.put("endDay",27);
-        stringObjectHashMap.put("endMonth",6);
+        stringObjectHashMap.put("endDay",now.getDayOfMonth());
+        stringObjectHashMap.put("endMonth",now.getMonthValue());
         stringObjectHashMap.put("endYear",now.getYear());
         ArrayList<Zone> ouPutZoneList = new ArrayList<>();
         List<Zone> zones=null;
         if ("hours".equals(selectMode))
         {
-            stringObjectHashMap.put("startDay",27);
-            stringObjectHashMap.put("startMonth",6);
+            stringObjectHashMap.put("startDay",now.getDayOfMonth()-1);
+            stringObjectHashMap.put("startMonth",now.getMonthValue());
             stringObjectHashMap.put("startYear",now.getYear());
 
              zones = zoneServer.getselectTotalZoneForCurrentTime(stringObjectHashMap);
         }
         else
         {
-            List<Zone> currentMonthFirstDayForZoneData = zoneServer.getCurrentMonthFirstDayForZoneData(6, now.getYear());
+            List<Zone> currentMonthFirstDayForZoneData = zoneServer.getCurrentMonthFirstDayForZoneData(now.getMonthValue(), now.getYear());
             if (currentMonthFirstDayForZoneData.size()==2)
             {
 
-                //stringObjectHashMap.put("startDay",currentMonthFirstDayForZoneData.get(0).gettTime().getDayOfMonth());
-                stringObjectHashMap.put("startDay",26);
-                stringObjectHashMap.put("startMonth",6);
+                stringObjectHashMap.put("startDay",currentMonthFirstDayForZoneData.get(0).gettTime().getDayOfMonth());
+               //stringObjectHashMap.put("startDay",26);
+                stringObjectHashMap.put("startMonth",now.getMonthValue());
                 stringObjectHashMap.put("startYear",now.getYear());
                 zones = zoneServer.getselectTotalZoneForCurrentTime(stringObjectHashMap);
             }
@@ -245,13 +256,13 @@ public class ZoneController {
         stringObjectHashMap.put("addtime",1);
         if ("hours".equals(selectMode))
         {
-            stringObjectHashMap.put("starttime",LocalDateTime.of(2021,6,27,0,0,0));
-            stringObjectHashMap.put("endTime",LocalDateTime.of(2021,6,28,0,0,0));
+            stringObjectHashMap.put("starttime",LocalDateTime.of(now.getYear(),now.getMonthValue(),now.getDayOfMonth(),0,0,0));
+            stringObjectHashMap.put("endTime",LocalDateTime.of(now.getYear(),now.getMonthValue(),now.getDayOfMonth()+1,0,0,0));
         }
         else
         {
-            stringObjectHashMap.put("starttime",LocalDateTime.of(2021,6,1,0,0,0));
-            stringObjectHashMap.put("endTime",LocalDateTime.of(2021,7,1,0,0,0));
+            stringObjectHashMap.put("starttime",LocalDateTime.of(now.getYear(),now.getMonthValue(),1,0,0,0));
+            stringObjectHashMap.put("endTime",LocalDateTime.of(now.getYear(),now.getMonthValue()+1,1,0,0,0));
         }
 
         if ("T3".equals(areaType))
@@ -364,7 +375,7 @@ public class ZoneController {
                 });
                 for (int i=0;i<proAmountList.size()-1;i++)
                 {
-                    proAmounts.get(i).settValue(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue());
+                    proAmounts.get(i).settValue(Math.max(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue(),0));
                 }
                 proAmounts.remove(proAmounts.size()-1);
                 if (isNoProductionSelect)
@@ -429,34 +440,57 @@ public class ZoneController {
 
     }
 
-    @GetMapping("/selectNoProductionOfMonth")
+  /*  @GetMapping("/selectNoProductionOfMonth")
     public Map<String,Object> selectNoProductionOfMonth( @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime,Integer nonProductionValueLimit)
     {
         int diffDay = endTime.compareTo(startTime);
         HashMap<String, Object> localDateTimeObjectHashMap = new HashMap<>();
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
-        Long totalEnerngy=0L;
+
         Long totalNoProductionEnergy=0L;
         ArrayList<Zone> FinallOutPutZoneList = new ArrayList<>();
-        for (int i=0;i<=diffDay;i++)
+
+        Integer totalEnergy=0;
+        List<Zone> zoneFirst = zoneServer.geteveryDayFirstTimeEnergy(startTime,endTime.plusMinutes(5));
+
+        if (zoneFirst.size()!=0)
+        {
+            List<Zone> collectT3 = zoneFirst.stream().filter(item -> {
+                return item.getEid() == 26;
+            }).sorted((item1, item2) -> {
+                return item1.gettValue() - item2.gettValue();
+            }).collect(Collectors.toList());
+            List<Zone> collectT4 = zoneFirst.stream().filter(item -> {
+                return item.getEid() == 27;
+            }).sorted((item1, item2) -> {
+                return item1.gettValue() - item2.gettValue();
+            }).collect(Collectors.toList());
+            totalEnergy=(collectT3.get(1).gettValue()-collectT3.get(0).gettValue())+(collectT4.get(1).gettValue()-collectT4.get(0).gettValue());
+        }
+        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);
+        SqlSession sqlSession1 = sqlSessionFactory.openSession(ExecutorType.BATCH);
+        ProAmountDAO ProAmountMapper = sqlSession1.getMapper(ProAmountDAO.class);
+        ZoneDAO ZoneDAOMapper = sqlSession.getMapper(ZoneDAO.class);
+        for (int i=0;i<diffDay;i++)
         {
             atomicInteger.set(0);
-            ArrayList<Zone> totalZoneData = new ArrayList<>();
-            ArrayList<Zone> finallTotalZoneData = new ArrayList<>();
-            ArrayList<ProAmount> finallProAmounts = new ArrayList<>();
+
             stringObjectHashMap.put("starttime",startTime);
             stringObjectHashMap.put("addtime",1);
             stringObjectHashMap.put("eid",26);
             stringObjectHashMap.put("endTime",startTime.plusDays(1));
-            List<Zone> zonesT3 = zoneServer.getzonelistForCUROS(stringObjectHashMap);
+            //List<Zone> zonesT3 = zoneServer.getzonelistForCUROS(stringObjectHashMap);
+            List<Zone> zonesT3 = ZoneDAOMapper.getzonelistForCUROS(stringObjectHashMap);
             stringObjectHashMap.put("eid",27);
-            List<Zone> zonesT4 = zoneServer.getzonelistForCUROS(stringObjectHashMap);
+           // List<Zone> zonesT4 = zoneServer.getzonelistForCUROS(stringObjectHashMap);
+            List<Zone> zonesT4 = ZoneDAOMapper.getzonelistForCUROS(stringObjectHashMap);
             for (int j=0;j<zonesT3.size();j++)
             {
                 totalZoneData.add(new Zone(null,zonesT3.get(j).gettValue()+zonesT4.get(j).gettValue(),zonesT3.get(j).gettTime()));
             }
             stringObjectHashMap.put("node",5);
-            List<ProAmount> proAmountListForDay = proAmountServer.getProAmountList(stringObjectHashMap);
+            //List<ProAmount> proAmountListForDay = proAmountServer.getProAmountList(stringObjectHashMap);
+            List<ProAmount> proAmountListForDay = ProAmountMapper.getProAmountList(stringObjectHashMap);
             if (proAmountListForDay.size()!=0)
             {
                 proAmountListForDay.forEach(item->{
@@ -464,13 +498,13 @@ public class ZoneController {
                 });
                 for (int g=0;g<proAmountListForDay.size()-1;g++)
                 {
-                    finallProAmounts.get(g).settValue(proAmountListForDay.get(g+1).gettValue()-proAmountListForDay.get(g).gettValue());
+                    finallProAmounts.get(g).settValue(Math.max(proAmountListForDay.get(g + 1).gettValue() - proAmountListForDay.get(g).gettValue(), 0));
                 }
                 finallProAmounts.remove(finallProAmounts.size()-1);
             }
             else
             {
-                break;
+                continue;
             }
             if (totalZoneData.size()!=0)
             {
@@ -479,26 +513,25 @@ public class ZoneController {
                 });
                 for (int c=0;c<totalZoneData.size()-1;c++)
                 {
-                    finallTotalZoneData.get(0).settValue(totalZoneData.get(c+1).gettValue()-totalZoneData.get(c).gettValue());
+                    finallTotalZoneData.get(c).settValue(totalZoneData.get(c+1).gettValue()-totalZoneData.get(c).gettValue());
                 }
                 finallTotalZoneData.remove(finallTotalZoneData.size()-1);
             }
             else
             {
-                break;
+                continue;
             }
 
-            ArrayList<ProAmount> filterProAmountList=new ArrayList<>();
-            ArrayList<ProAmount> finallFilterProAmountList=new ArrayList<>();
+
             if (finallTotalZoneData.size()!=finallProAmounts.size()&&finallTotalZoneData.size()!=0&&finallProAmounts.size()!=0)
             {
                 finallTotalZoneData.forEach(item->{
-                            int monthValue = item.gettTime().getMonthValue();
+                            int hoursValue = item.gettTime().getHour();
                             int dayOfMonth = item.gettTime().getDayOfMonth();
                             filterProAmountList.addAll(finallProAmounts.stream().filter(itemAmounts->{
-                                int monthValueForAmount = itemAmounts.gettTime().getMonthValue();
+                                int hoursValueForAmount = itemAmounts.gettTime().getHour();
                                 int dayOfMonthForAmountHour = itemAmounts.gettTime().getDayOfMonth();
-                                return dayOfMonth==dayOfMonthForAmountHour && monthValue==monthValueForAmount;
+                                return dayOfMonth==dayOfMonthForAmountHour && hoursValue==hoursValueForAmount;
                             }).collect(Collectors.toList()));
                         });
 
@@ -514,22 +547,204 @@ public class ZoneController {
                 finallFilterProAmountList.addAll(filterProAmountList);
             }
 
-            List<Zone> collect = finallTotalZoneData.stream().filter(zoneItem -> {
-                int index = atomicInteger.get();
-                atomicInteger.getAndIncrement();
-                return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
-            }).collect(Collectors.toList());
-            IntSummaryStatistics collectOfTotal = finallTotalZoneData.stream().collect(Collectors.summarizingInt(Zone::gettValue));
-            totalEnerngy+=collectOfTotal.getSum();
+            List<Zone> collect=null;
+            if (finallTotalZoneData.size()==finallFilterProAmountList.size())
+            {
+                collect = finallTotalZoneData.stream().filter(zoneItem -> {
+                    int index = atomicInteger.get();
+
+                    atomicInteger.getAndIncrement();
+                    return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                }).collect(Collectors.toList());
+            }
+            else
+            {
+                collect = finallTotalZoneData.stream().filter(zoneItem -> {
+                    int index = atomicInteger.get();
+
+                    atomicInteger.getAndIncrement();
+                    if (index>finallFilterProAmountList.size()-1)
+                    {
+                        return zoneItem.gettValue() <= nonProductionValueLimit;
+                    }
+                    return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                }).collect(Collectors.toList());
+            }
+
             IntSummaryStatistics collectForNoProduction = collect.stream().collect(Collectors.summarizingInt(Zone::gettValue));
             int sum = (int)collectForNoProduction.getSum();
             totalNoProductionEnergy+=sum;
             Zone Finallzone = new Zone(null, sum, startTime);
             FinallOutPutZoneList.add(Finallzone);
             startTime=startTime.plusDays(1);
+            totalZoneData.clear();
+            finallTotalZoneData.clear();
+            finallProAmounts.clear();
+            filterProAmountList.clear();
+            finallFilterProAmountList.clear();
         }
+        sqlSession.close();
+        sqlSession1.close();
         localDateTimeObjectHashMap.put("main",FinallOutPutZoneList);
-        localDateTimeObjectHashMap.put("totalEnergy",totalEnerngy);
+        localDateTimeObjectHashMap.put("totalEnergy",totalEnergy);
+        localDateTimeObjectHashMap.put("totalEnergyOfNoProduction",totalNoProductionEnergy);
+        return localDateTimeObjectHashMap;
+    }*/
+
+    @GetMapping("/selectNoProductionOfMonth")
+    public Map<String,Object> selectNoProductionOfMonth( @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime,Integer nonProductionValueLimit)
+    {
+        int diffDay = endTime.compareTo(startTime);
+        HashMap<String, Object> localDateTimeObjectHashMap = new HashMap<>();
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+
+        Long totalNoProductionEnergy=0L;
+        ArrayList<Zone> finallOutPutZoneList = new ArrayList<>();
+
+        Integer totalEnergy=0;
+        List<Zone> zoneFirst = zoneServer.geteveryDayFirstTimeEnergy(startTime,endTime.plusMinutes(5));
+
+        if (zoneFirst.size()!=0)
+        {
+            List<Zone> collectT3 = zoneFirst.stream().filter(item -> {
+                return item.getEid() == 26;
+            }).sorted((item1, item2) -> {
+                return item1.gettValue() - item2.gettValue();
+            }).collect(Collectors.toList());
+            List<Zone> collectT4 = zoneFirst.stream().filter(item -> {
+                return item.getEid() == 27;
+            }).sorted((item1, item2) -> {
+                return item1.gettValue() - item2.gettValue();
+            }).collect(Collectors.toList());
+            totalEnergy=(collectT3.get(1).gettValue()-collectT3.get(0).gettValue())+(collectT4.get(1).gettValue()-collectT4.get(0).gettValue());
+        }
+
+            atomicInteger.set(0);
+
+            stringObjectHashMap.put("starttime",startTime);
+            stringObjectHashMap.put("addtime",1);
+
+            stringObjectHashMap.put("endTime",endTime);
+            List<Zone> zonesTotal = zoneServer.getFinallgetvaluediffonCUROSOfTotal(stringObjectHashMap);
+        List<Zone> zonesT3 = zonesTotal.stream().filter(item -> {
+            return item.getEid() == 26;
+        }).collect(Collectors.toList());
+        List<Zone> zonesT4 = zonesTotal.stream().filter(item -> {
+            return item.getEid() == 27;
+        }).collect(Collectors.toList());
+
+        for (int j=0;j<zonesT3.size();j++)
+            {
+                totalZoneData.add(new Zone(null,zonesT3.get(j).gettValue()+zonesT4.get(j).gettValue(),zonesT3.get(j).gettTime()));
+            }
+            stringObjectHashMap.put("node",5);
+            List<ProAmount> proAmountListForDay = proAmountServer.getProAmountList(stringObjectHashMap);
+
+            if (proAmountListForDay.size()!=0)
+            {
+                proAmountListForDay.forEach(item->{
+                    finallProAmounts.add(new ProAmount(null,item.gettValue(),item.gettTime()));
+                });
+                for (int g=0;g<proAmountListForDay.size()-1;g++)
+                {
+                    finallProAmounts.get(g).settValue(Math.max(proAmountListForDay.get(g + 1).gettValue() - proAmountListForDay.get(g).gettValue(), 0));
+                }
+                finallProAmounts.remove(finallProAmounts.size()-1);
+            }
+            else
+            {
+               return null;
+            }
+            if (totalZoneData.size()!=0)
+            {
+                totalZoneData.forEach(item->{
+                    finallTotalZoneData.add(new Zone(null,item.gettValue(),item.gettTime()));
+                });
+                for (int c=0;c<totalZoneData.size()-1;c++)
+                {
+                    finallTotalZoneData.get(c).settValue(totalZoneData.get(c+1).gettValue()-totalZoneData.get(c).gettValue());
+                }
+                finallTotalZoneData.remove(finallTotalZoneData.size()-1);
+            }
+            else
+            {
+                return null;
+            }
+
+
+            if (finallTotalZoneData.size()!=finallProAmounts.size()&&finallTotalZoneData.size()!=0&&finallProAmounts.size()!=0)
+            {
+                finallTotalZoneData.forEach(item->{
+                    int hoursValue = item.gettTime().getHour();
+                    int dayOfMonth = item.gettTime().getDayOfMonth();
+                    int monthValue = item.gettTime().getMonthValue();
+                    filterProAmountList.addAll(finallProAmounts.stream().filter(itemAmounts->{
+                        int hoursValueForAmount = itemAmounts.gettTime().getHour();
+                        int dayOfMonthForAmountHour = itemAmounts.gettTime().getDayOfMonth();
+                        int monthValueForAmount = itemAmounts.gettTime().getMonthValue();
+                        return monthValue==monthValueForAmount && dayOfMonth==dayOfMonthForAmountHour && hoursValue==hoursValueForAmount;
+                    }).collect(Collectors.toList()));
+                });
+
+
+
+            }
+            if (filterProAmountList.size()==0)
+            {
+                finallFilterProAmountList.addAll(finallProAmounts);
+            }
+            else
+            {
+                finallFilterProAmountList.addAll(filterProAmountList);
+            }
+
+            List<Zone> collect=null;
+            if (finallTotalZoneData.size()==finallFilterProAmountList.size())
+            {
+                collect = finallTotalZoneData.stream().filter(zoneItem -> {
+                    int index = atomicInteger.get();
+
+                    atomicInteger.getAndIncrement();
+                    return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                }).collect(Collectors.toList());
+            }
+            else
+            {
+                collect = finallTotalZoneData.stream().filter(zoneItem -> {
+                    int index = atomicInteger.get();
+
+                    atomicInteger.getAndIncrement();
+                    if (index>finallFilterProAmountList.size()-1)
+                    {
+                        return zoneItem.gettValue() <= nonProductionValueLimit;
+                    }
+                    return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                }).collect(Collectors.toList());
+            }
+            for (int i=0;i<diffDay;i++)
+            {
+                int monthValue = startTime.getMonthValue();
+                int dayOfMonth = startTime.getDayOfMonth();
+                int year = startTime.getYear();
+                IntSummaryStatistics collectForDefineTime = collect.stream().filter(item -> {
+                    LocalDateTime localDateTime = item.gettTime();
+                    return localDateTime.getYear() == year && localDateTime.getMonthValue() == monthValue && localDateTime.getDayOfMonth() == dayOfMonth;
+                }).collect(Collectors.summarizingInt(Zone::gettValue));
+                finallOutPutZoneList.add(new Zone(null, (int) collectForDefineTime.getSum(),startTime));
+                startTime=startTime.plusDays(1);
+            }
+
+            IntSummaryStatistics collectForNoProduction = collect.stream().collect(Collectors.summarizingInt(Zone::gettValue));
+            int sum = (int)collectForNoProduction.getSum();
+            totalNoProductionEnergy+=sum;
+            totalZoneData.clear();
+            finallTotalZoneData.clear();
+            finallProAmounts.clear();
+            filterProAmountList.clear();
+            finallFilterProAmountList.clear();
+
+        localDateTimeObjectHashMap.put("main",finallOutPutZoneList);
+        localDateTimeObjectHashMap.put("totalEnergy",totalEnergy);
         localDateTimeObjectHashMap.put("totalEnergyOfNoProduction",totalNoProductionEnergy);
         return localDateTimeObjectHashMap;
     }

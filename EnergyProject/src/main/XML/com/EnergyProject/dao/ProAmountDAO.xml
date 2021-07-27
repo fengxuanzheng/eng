@@ -7,7 +7,7 @@
         <result column="t_value" property="tValue"/>
         <result column="t_time" property="tTime"/>
     </resultMap>
-    <select id="getProAmountList" statementType="CALLABLE" resultMap="ProAmountForCALLABLE" resultSetType="FORWARD_ONLY" >
+    <select id="getProAmountList" statementType="CALLABLE" resultMap="ProAmountForCALLABLE"  >
         {
          call finallgetProAmountonCUROS(
              #{starttime,mode=IN,jdbcType=TIMESTAMP},

@@ -1,9 +1,10 @@
 package com.EnergyProject.shiro;
 
 
-import com.EnergyProject.dao.Shiro_usernameMapper;
-import com.EnergyProject.pojo.Shiro_username;
-import com.EnergyProject.pojo.Shiro_usernameExample;
+
+import com.EnergyProject.pojo.EnergyUsername;
+
+import com.EnergyProject.server.ENERGYUSERNAMEService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
@@ -17,11 +18,11 @@ import java.util.List;
 
 public class ShiroRealmForDateBase extends AuthorizingRealm {
     @Autowired
-    private Shiro_usernameMapper shiro_usernameMapper;
+    private ENERGYUSERNAMEService energyusernameService;
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         Object primaryPrincipal = principals.getPrimaryPrincipal();
-         Shiro_username shiro_usernam=(Shiro_username)primaryPrincipal;
+         EnergyUsername shiro_usernam=(EnergyUsername)primaryPrincipal;
         HashSet<String> hashSet = new HashSet<>();
         String status = shiro_usernam.getStatus();
         if ("0".equals(status))
@@ -32,8 +33,6 @@ public class ShiroRealmForDateBase extends AuthorizingRealm {
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
         simpleAuthorizationInfo.addRoles(hashSet);
 
-
-
         return simpleAuthorizationInfo;
     }
 
@@ -43,17 +42,15 @@ public class ShiroRealmForDateBase extends AuthorizingRealm {
         String username = usernamePasswordToken.getUsername();
         Object credentials = usernamePasswordToken.getCredentials();
         String password=new String((char[])credentials);
-        Shiro_usernameExample shiro_usernameExample = new Shiro_usernameExample();
-        shiro_usernameExample.createCriteria().andUsernameEqualTo(username);
-        List<Shiro_username> shiro_usernames = shiro_usernameMapper.selectByExampleWithBLOBs(shiro_usernameExample);
-        if(shiro_usernames==null || shiro_usernames.isEmpty())
+        EnergyUsername energyUsername = energyusernameService.selectUsernameByUser(username);
+        if(energyUsername==null)
         {
             throw  new AuthenticationException("登入失败");
         }
-        String getsalt = shiro_usernameMapper.getsalt(username);
+        String getsalt = energyUsername.getSalt();
         ByteSource bytes = ByteSource.Util.bytes(getsalt);
 
-        SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(shiro_usernames.get(0), shiro_usernames.get(0).getPassword(),bytes, getName());
+        SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(energyUsername, energyUsername.getPassword(),bytes, getName());
         return simpleAuthenticationInfo;
     }
 }

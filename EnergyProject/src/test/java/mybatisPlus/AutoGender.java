@@ -28,7 +28,7 @@ public class AutoGender {
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
         dataSourceConfig.setDbType(DbType.SQL_SERVER)
                 .setDriverName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
-                .setUrl("jdbc:sqlserver://localhost:1433;database=KEPServerEX 8 ")
+                .setUrl("jdbc:sqlserver://localhost:1433;database=KEPServerEX 6 ")
                 .setUsername("root")
                 .setPassword("820606");
 
@@ -36,7 +36,7 @@ public class AutoGender {
         StrategyConfig strategyConfig = new StrategyConfig();
         strategyConfig.setCapitalMode(true)  //全局大写命名
                 .setColumnNaming(NamingStrategy.no_change) //数据库表映射到实体命名策略
-                .setInclude("ApplyReport");
+                .setInclude("EnergyUsername");
 
         //包名策略
         PackageConfig packageConfig = new PackageConfig();

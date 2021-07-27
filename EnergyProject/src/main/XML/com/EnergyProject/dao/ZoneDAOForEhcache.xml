@@ -34,4 +34,17 @@
         SELECT eid, t_value,t_time FROM orderIndex
         where numIndex in(1,2) or numIndex in((SELECT total from countindex)-1,(SELECT total from countindex))
     </select>
+    <select id="geteveryDayFirstTimeEnergyOfFinall" resultType="com.EnergyProject.pojo.Zone">
+
+
+        SELECT a1.eid,a1.t_value,a1.t_time from (
+                                                    SELECT ROW_NUMBER () over(ORDER BY t_time,eid) as numIndex, eid,t_value,t_time,(select count(eid) from zone where t_time BETWEEN #{startTime} and #{endTime} and eid in(26,27)) as total from zone where t_time BETWEEN #{startTime} and #{endTime} and eid in(26,27)
+                                                )as a1 LEFT JOIN(
+
+            SELECT ROW_NUMBER () over(ORDER BY t_time,eid) as numIndex, eid,t_value,t_time from zone where t_time BETWEEN #{startTime} and #{endTime} and eid in(26,27)) as a2 on a1.numIndex=a2.numIndex
+        where a1.numIndex in(1,2) or a1.numIndex in(a1.total-1,a1.total)
+
+
+
+    </select>
 </mapper>

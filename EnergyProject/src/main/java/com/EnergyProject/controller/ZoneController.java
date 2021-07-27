@@ -602,7 +602,7 @@ public class ZoneController {
         ArrayList<Zone> finallOutPutZoneList = new ArrayList<>();
 
         Integer totalEnergy=0;
-        List<Zone> zoneFirst = zoneServer.geteveryDayFirstTimeEnergy(startTime,endTime.plusMinutes(5));
+        List<Zone> zoneFirst = zoneServer.getEveryDayFirstTimeEnergyOfFinall(startTime,endTime.plusMinutes(5));
 
         if (zoneFirst.size()!=0)
         {
@@ -712,13 +712,29 @@ public class ZoneController {
             {
                 collect = finallTotalZoneData.stream().filter(zoneItem -> {
                     int index = atomicInteger.get();
+                    if (index<=finallFilterProAmountList.size()-1)
+                    {
+                        LocalDateTime localDateTime = finallFilterProAmountList.get(index).gettTime();
+                        int year = localDateTime.getYear();
+                        int monthValue = localDateTime.getMonthValue();
+                        int dayOfMonth = localDateTime.getDayOfMonth();
+                        int hour = localDateTime.getHour();
+                        LocalDateTime localDateTimeForZone = zoneItem.gettTime();
+                        if (year==localDateTimeForZone.getYear() && monthValue==localDateTimeForZone.getMonthValue() && dayOfMonth==localDateTimeForZone.getDayOfMonth() && hour==localDateTimeForZone.getHour())
+                        {
+                            atomicInteger.getAndIncrement();
+                            return finallFilterProAmountList.get(index).gettValue()==0 && zoneItem.gettValue()<=nonProductionValueLimit;
+                        }
+                        else
+                        {
+                            return zoneItem.gettValue() <= nonProductionValueLimit;
+                        }
+                    }
 
-                    atomicInteger.getAndIncrement();
-                    if (index>finallFilterProAmountList.size()-1)
+                    else
                     {
                         return zoneItem.gettValue() <= nonProductionValueLimit;
                     }
-                    return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
                 }).collect(Collectors.toList());
             }
             for (int i=0;i<diffDay;i++)

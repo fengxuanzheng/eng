@@ -344,6 +344,10 @@ public class ZoneServer {
         return zoneDAOForEhcache.geteveryDayFirstTimeEnergy(startTime,endTime);
 
     }
+    public List<Zone> getEveryDayFirstTimeEnergyOfFinall(LocalDateTime startTime,LocalDateTime endTime)
+    {
+        return zoneDAOForEhcache.geteveryDayFirstTimeEnergyOfFinall(startTime,endTime);
+    }
     public Zone getSelectSingleZone(Integer eid)
     {
        return zoneDAO.selectSingleZone(eid);

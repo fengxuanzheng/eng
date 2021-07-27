@@ -101,6 +101,7 @@
                 <property name="hashIterations" value="100"/>
             </bean>
         </property>
+
     </bean>
 
     <!-- =========================================================
@@ -135,7 +136,7 @@
                        若不一致, 则会抛出: NoSuchBeanDefinitionException. 因为 Shiro 会来 IOC 容器中查找和 <filter-name> 名字对应的 filter bean.-->
     <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
         <property name="securityManager" ref="securityManager"/>
-        <property name="loginUrl" value="/login"/>
+        <property name="loginUrl" value="/energyUsername"/>
         <property name="successUrl" value="/pages/success.jsp"/>
         <property name="unauthorizedUrl" value="/pages/unauthorized.jsp"/>
         <property name="filters">
@@ -173,6 +174,7 @@
                 /registerUser=anon
                 /isusername=anon
                 /logout=logout
+                /energyUsername/loginEnergy=anon
                 /**=authc
             </value>
         </property><!--被通过实例工厂给属性filterChainDefinitions赋值代替-->

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class MyMetaObjectHandler  implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
-
+        this.strictInsertFill(metaObject,"updateTime",LocalDateTime::now,LocalDateTime.class);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class MyMetaObjectHandler  implements MetaObjectHandler {
         }*/
         log.warn("为空开始插入操作");
         this.strictUpdateFill(metaObject, "checkTime", LocalDateTime::now, LocalDateTime.class);
-
+        this.strictInsertFill(metaObject,"updateTime",LocalDateTime::now,LocalDateTime.class);
 
     }
 }

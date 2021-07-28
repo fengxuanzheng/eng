@@ -29,6 +29,14 @@ public class ShiroRealmForDateBase extends AuthorizingRealm {
         {
             hashSet.add("管理员");
         }
+        else if ("1".equals(status))
+        {
+            hashSet.add("普通");
+        }
+        else
+        {
+            hashSet.add("游客");
+        }
 
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
         simpleAuthorizationInfo.addRoles(hashSet);

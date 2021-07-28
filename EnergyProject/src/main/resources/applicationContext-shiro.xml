@@ -175,7 +175,7 @@
                 /isusername=anon
                 /logout=logout
                 /energyUsername/loginEnergy=anon
-                /**=authc
+                <!--/**=authc-->
             </value>
         </property><!--被通过实例工厂给属性filterChainDefinitions赋值代替-->
     </bean>

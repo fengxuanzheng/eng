@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 /**
  * <p>
  *  服务实现类
@@ -24,5 +26,11 @@ public class EnergyUsernameServiceImpl extends ServiceImpl<EnergyUsernameMapper,
     @Override
     public EnergyUsername selectUsernameByUser(String username) {
         return energyUsernameMapper.selectOne(new QueryWrapper<EnergyUsername>().eq("username",username));
+    }
+
+    @Override
+    public Integer rejectEnergyUsername(EnergyUsername energyUsername) {
+
+       return energyUsernameMapper.insert(energyUsername);
     }
 }

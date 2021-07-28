@@ -4,6 +4,7 @@ package com.EnergyProject.controller;
 import com.EnergyProject.pojo.ApplyReport;
 import com.EnergyProject.server.APPLYREPORTervice;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ public class ApplyReportController {
     private Map<String,Object>outPutAllApplyReport=new HashMap<>();
 
     @PostMapping("/insterApplyReport")
+    @RequiresRoles(value = {"普通"})
     public Boolean insterApplyReport(@RequestBody(required = false)ApplyReport applyReport)
     {
         Integer integer = applyreporTervice.insterApplyReport(applyReport);
@@ -41,6 +43,7 @@ public class ApplyReportController {
     }
 
     @GetMapping("/selectStatus")
+    @RequiresRoles(value = {"管理员"})
     public Map<String, Object> selectStatus(@RequestParam(value = "currentPage",defaultValue = "2")Integer page, @RequestParam(value = "currentSize",defaultValue = "10") Integer size)
     {
 
@@ -48,6 +51,7 @@ public class ApplyReportController {
     }
 
     @PostMapping("/checkBoxAllData")
+    @RequiresRoles(value = {"管理员"})
     public Boolean checkBoxAllData(@RequestBody(required = false) Integer[] selectId,@RequestParam("selectMode") String selectMode){
 
          Integer integer = applyreporTervice.updataApplyReportDataStatus(selectId, selectMode);
@@ -56,6 +60,7 @@ public class ApplyReportController {
     }
 
     @PostMapping("/singleApplyReportStatus")
+    @RequiresRoles(value = {"管理员"})
     public Boolean singleApplyReportStatus(@RequestBody(required = false) ApplyReport applyReport)
     {
         Integer integer = applyreporTervice.singleApplyReportDataStatus(applyReport);
@@ -63,6 +68,7 @@ public class ApplyReportController {
     }
 
     @GetMapping("/getAllApplyReport")
+    @RequiresRoles(value = {"管理员"})
     public Map<String,Object> getAllApplyReport(@RequestParam(value = "currentPage",defaultValue = "1")Integer page, @RequestParam(value = "currentSize",defaultValue = "10") Integer size,@RequestParam(value = "isReject",defaultValue = "false") Boolean isReject)
     {
         if (!isReject)
@@ -83,6 +89,7 @@ public class ApplyReportController {
     }
 
     @PostMapping("/selectOfApplyReportOfAccurate")
+    @RequiresRoles(value = {"管理员"})
     public Map<String,Object> selectOfApplyReportOfAccurate(@RequestBody(required = false) Map<String,Map<String,Object>> accurateSelect,@RequestParam(value = "currentPage",defaultValue = "1")Integer page, @RequestParam(value = "currentSize",defaultValue = "10") Integer size)
     {
         IPage<ApplyReport> applyReportIPage = applyreporTervice.selectOfApplyUsername(accurateSelect, page, size);
@@ -92,18 +99,21 @@ public class ApplyReportController {
     }
 
     @GetMapping("/getAllUsername")
+    @RequiresRoles(value = {"管理员"})
     public List<String> getAllUsername()
     {
         return applyreporTervice.getAllUsername();
     }
 
     @DeleteMapping("/deleteApplyReport")
+    @RequiresRoles(value = {"管理员"})
     public Boolean deleteApplyReport(Integer id)
     {
         Integer integer = applyreporTervice.deleteApplyReport(id);
         return integer!=null;
     }
     @PostMapping("/deleteAllApplyReport")
+    @RequiresRoles(value = {"管理员"})
     public Boolean deleteAllApplyReport(@RequestBody(required = false) List<Integer> ids)
     {
         Integer integer = applyreporTervice.deleteAllApplyReport(ids);
@@ -115,6 +125,7 @@ public class ApplyReportController {
       return   applyreporTervice.updataApplyReport(id);
     }
     @PostMapping("/updataApplyReportFinall")
+    @RequiresRoles(value = {"管理员"})
     public Boolean updataApplyReportFinall(@RequestBody(required = false) ApplyReport applyReport)
     {
         Integer integer = applyreporTervice.updataApplyReportFinall(applyReport);
@@ -122,6 +133,7 @@ public class ApplyReportController {
     }
 
     @PostMapping("/sendRejectText")
+    @RequiresRoles(value = {"管理员"})
     public Boolean sendRejectText(@RequestBody(required = false) Map<String,Object> rejectText,Integer id)
     {
         Integer integer = applyreporTervice.sendRejectText(rejectText, id);
@@ -129,6 +141,7 @@ public class ApplyReportController {
     }
 
     @GetMapping("/agreeRejectApplyReportForComment")
+    @RequiresRoles(value = {"管理员"})
     public Boolean agreeRejectApplyReportForComment(Integer id)
     {
         Integer integer = applyreporTervice.agreeRejectApplyReportForComment(id);

@@ -1,10 +1,7 @@
 package com.EnergyProject.pojo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
@@ -58,7 +55,7 @@ public class EnergyUsername extends Model<EnergyUsername> {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
     private LocalDateTime createTime;
 
-    @TableField("updateTime")
+    @TableField(value = "updateTime",fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "GMT+8")
     private LocalDateTime updateTime;
 

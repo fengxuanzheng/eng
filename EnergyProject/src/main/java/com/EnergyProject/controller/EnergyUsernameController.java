@@ -1,18 +1,18 @@
 package com.EnergyProject.controller;
 
 
+import com.EnergyProject.pojo.EnergyUsername;
 import com.EnergyProject.server.ENERGYUSERNAMEService;
+import com.EnergyProject.utils.Md5Util;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -55,6 +55,26 @@ public class EnergyUsernameController {
         }
 
         return true;
+    }
+
+    @PostMapping("/rejectEnergyUser")
+    public Boolean rejectEnergyUser(@RequestBody(required = false) EnergyUsername energyUsername)
+    {
+        String password = energyUsername.getPassword();
+        String salt = Md5Util.salt(energyUsername.getUsername());
+        energyUsername.setSalt(salt);
+        SimpleHash simpleHash = new SimpleHash("MD5", password, salt, 100);
+        energyUsername.setPassword(simpleHash.toString());
+        Integer integer = ENERGYUSERNAMEService.rejectEnergyUsername(energyUsername);
+        return integer!=null;
+    }
+
+    @GetMapping("/getLoginUser")
+    public EnergyUsername getLoginUser()
+    {
+        Subject subject = SecurityUtils.getSubject();
+
+        return (EnergyUsername) subject.getPrincipal();
     }
 
 }

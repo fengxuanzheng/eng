@@ -3,6 +3,8 @@ package com.EnergyProject.server;
 import com.EnergyProject.pojo.EnergyUsername;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.Map;
+
 /**
  * <p>
  *  服务类
@@ -14,4 +16,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface ENERGYUSERNAMEService extends IService<EnergyUsername> {
 
     public EnergyUsername selectUsernameByUser(String username);
+    public Integer rejectEnergyUsername(EnergyUsername energyUsername);
+
 }

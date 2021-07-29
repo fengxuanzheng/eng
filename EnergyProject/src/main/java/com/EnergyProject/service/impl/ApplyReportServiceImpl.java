@@ -2,12 +2,15 @@ package com.EnergyProject.service.impl;
 
 import com.EnergyProject.pojo.ApplyReport;
 import com.EnergyProject.dao.ApplyReportMapper;
+import com.EnergyProject.pojo.EnergyUsername;
 import com.EnergyProject.server.APPLYREPORTervice;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -178,6 +181,13 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
     @Override
     public List<ApplyReport> getFirstThreeDaysOfApplyReportOfUnReviewed() {
         return applyReportMapper.getFirstThreeDaysOfApplyReportOfUnReviewed();
+    }
+
+    @Override
+    public Page<ApplyReport> getRejectModeData(Integer page, Integer size) {
+        Subject subject = SecurityUtils.getSubject();
+        EnergyUsername principal = (EnergyUsername) subject.getPrincipal();
+      return   applyReportMapper.selectPage(new Page<ApplyReport>().setCurrent(page).setSize(size),new QueryWrapper<ApplyReport>().eq("username",principal.getUsername()).orderByAsc("id"));
     }
 
 }

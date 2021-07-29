@@ -4,6 +4,7 @@ package com.EnergyProject.controller;
 import com.EnergyProject.pojo.EnergyUsername;
 import com.EnergyProject.server.ENERGYUSERNAMEService;
 import com.EnergyProject.utils.Md5Util;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Controller;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,6 +64,7 @@ public class EnergyUsernameController {
     @PostMapping("/rejectEnergyUser")
     public Boolean rejectEnergyUser(@RequestBody(required = false) EnergyUsername energyUsername)
     {
+        energyUsername.setStatus("2");
         String password = energyUsername.getPassword();
         String salt = Md5Util.salt(energyUsername.getUsername());
         energyUsername.setSalt(salt);
@@ -75,6 +80,32 @@ public class EnergyUsernameController {
         Subject subject = SecurityUtils.getSubject();
 
         return (EnergyUsername) subject.getPrincipal();
+    }
+
+    @GetMapping("/getAllEnergyUsernameData")
+    public Map<String,Object> getAllEnergyUsernameData(@RequestParam(value = "page",defaultValue = "1") Integer page,@RequestParam(value = "size",defaultValue = "10") Integer size)
+    {
+        Page<EnergyUsername> energyUsernameAllData = ENERGYUSERNAMEService.getEnergyUsernameAllData(page, size);
+        long total = energyUsernameAllData.getTotal();
+        List<EnergyUsername> records = energyUsernameAllData.getRecords();
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        stringObjectHashMap.put("data",records);
+        stringObjectHashMap.put("total",total);
+        return stringObjectHashMap;
+    }
+
+    @GetMapping("/setStatus")
+    public Boolean setStatus(Integer id,String status)
+    {
+        Integer integer = ENERGYUSERNAMEService.updataStatus(id, status);
+        return integer!=null;
+    }
+
+    @DeleteMapping("/delectEnergyUsername")
+    public Boolean delectEnergyUsername(Integer id)
+    {
+        Integer integer = ENERGYUSERNAMEService.delectEnergyUsername(id);
+        return integer!=null;
     }
 
 }

@@ -28,6 +28,7 @@ public class ShiroRealmForDateBase extends AuthorizingRealm {
         if ("0".equals(status))
         {
             hashSet.add("管理员");
+            hashSet.add("普通");
         }
         else if ("1".equals(status))
         {

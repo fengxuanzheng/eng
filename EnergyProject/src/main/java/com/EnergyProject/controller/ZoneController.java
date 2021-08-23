@@ -123,9 +123,12 @@ public class ZoneController {
     public List<Zone> getTodayTotalAllData()
     {
         List<Zone> zones = zoneServer.selectTotalZone();
+        LocalDateTime now = LocalDateTime.now();
+        List<Zone> zonesOfOrigin = zoneServer.getselectTotalZoneForYesterdayOfAsc(now.getDayOfMonth(), now.getMonthValue(), now.getYear());
         IntSummaryStatistics collect = zones.stream().collect(Collectors.summarizingInt(Zone::gettValue));
+        IntSummaryStatistics collect1 = zonesOfOrigin.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         List<Zone> collectFiler = zones.stream().filter(value -> value.getEid() != 27).collect(Collectors.toList());
-        collectFiler.add(new Zone(null,(int) collect.getSum(),collectFiler.get(0).gettTime()));
+        collectFiler.add(new Zone(null,(int) (collect.getSum()-collect1.getSum()),collectFiler.get(0).gettTime()));
 
         return collectFiler;
     }
@@ -135,14 +138,16 @@ public class ZoneController {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         LocalDateTime localDateTime = LocalDateTime.now().plusDays(-1);
         List<Zone> zoneYesterday = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth(), localDateTime.getMonthValue(), localDateTime.getYear());
+        List<Zone> zoneYesterdayfirst = zoneServer.getselectTotalZoneForYesterdayOfAsc(localDateTime.getDayOfMonth(), localDateTime.getMonthValue(), localDateTime.getYear());
         List<Zone> zoneBeforeDay = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth()-1, localDateTime.getMonthValue(), localDateTime.getYear());
         List<Zone> zoneLastMonth = zoneServer.getselectTotalZoneForYesterday(localDateTime.getDayOfMonth(), localDateTime.getMonthValue()-1, localDateTime.getYear());
 
         IntSummaryStatistics collectYesterday = zoneYesterday.stream().collect(Collectors.summarizingInt(Zone::gettValue));
+        IntSummaryStatistics collectYesterdayFirst = zoneYesterdayfirst.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         IntSummaryStatistics collectBeforeDay = zoneBeforeDay.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         IntSummaryStatistics collectLastMonth = zoneLastMonth.stream().collect(Collectors.summarizingInt(Zone::gettValue));
         List<Zone> collectFiler = new ArrayList<>();
-        collectFiler.add(new Zone(null,(int) collectYesterday.getSum(),zoneYesterday.size()!=0?zoneYesterday.get(0).gettTime():null));
+        collectFiler.add(new Zone(null,(int) (collectYesterday.getSum()-collectYesterdayFirst.getSum()),zoneYesterday.size()!=0?zoneYesterday.get(0).gettTime():null));
         Double beforeDayPercentage=null;
         Double lastMonthPercentage=null;
         if (collectYesterday.getSum()!=0 && collectBeforeDay.getSum()!=0)

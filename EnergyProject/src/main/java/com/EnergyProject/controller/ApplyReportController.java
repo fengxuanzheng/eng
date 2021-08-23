@@ -196,8 +196,8 @@ public class ApplyReportController {
     public List<ApplyReport> getFirstThreeDaysOfApplyReport()
     {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime lastThreeDayStartTime = now.plusDays(-3);
-        return applyreporTervice.getApplyReportOfAmountData(lastThreeDayStartTime,now.plusDays(-1));
+        LocalDateTime lastThreeDayStartTime = now.plusDays(-7);
+        return applyreporTervice.getApplyReportOfAmountData(lastThreeDayStartTime,now);
     }
 
     @GetMapping("/getFirstThreeDaysOfApplyReportOfUnReviewed")

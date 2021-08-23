@@ -175,7 +175,7 @@ public  class ApplyReportServiceImpl extends ServiceImpl<ApplyReportMapper, Appl
 
     @Override
     public List<ApplyReport> getApplyReportOfAmountData(LocalDateTime startTime, LocalDateTime endTime) {
-      return applyReportMapper.selectList(new QueryWrapper<ApplyReport>().ge("workTimeStart",startTime).le("workTimeEnd",endTime).eq("status","已审核").orderByAsc("id"));
+      return applyReportMapper.selectList(new QueryWrapper<ApplyReport>().ge("workTimeStart",startTime).le("workTimeStart",endTime).eq("status","已审核").orderByAsc("id"));
     }
 
     @Override

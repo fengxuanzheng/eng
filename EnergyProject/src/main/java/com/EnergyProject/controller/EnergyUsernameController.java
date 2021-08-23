@@ -64,7 +64,7 @@ public class EnergyUsernameController {
     @PostMapping("/rejectEnergyUser")
     public Boolean rejectEnergyUser(@RequestBody(required = false) EnergyUsername energyUsername)
     {
-        energyUsername.setStatus("2");
+        energyUsername.setStatus("1");
         String password = energyUsername.getPassword();
         String salt = Md5Util.salt(energyUsername.getUsername());
         energyUsername.setSalt(salt);

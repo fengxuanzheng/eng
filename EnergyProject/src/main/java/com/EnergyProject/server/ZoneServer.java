@@ -250,6 +250,11 @@ public class ZoneServer {
         return zoneDAOForEhcache.selectZoneForSpecificTime(day, month, year,eid);
 
     }
+
+    public List<Zone> getselectTotalZoneForYesterdayOfAsc(Integer day,Integer month , Integer year)
+    {
+        return zoneDAOForEhcache.getselectTotalZoneForYesterdayOfAsc(day,month,year);
+    }
     public List<Zone> getselectTotalZoneForYesterday(Integer day,Integer month , Integer year)
     {
         return zoneDAOForEhcache.getselectTotalZoneForYesterday(day,month,year);
@@ -352,6 +357,7 @@ public class ZoneServer {
     {
        return zoneDAO.selectSingleZone(eid);
     }
+
     public List<Zone> selectTotalZone()
     {
         return zoneDAO.selectTotalZone();

@@ -169,7 +169,7 @@ public class ZoneController {
 
 
     @GetMapping("/getTesterdayDataForMonth")
-
+    @Deprecated
     public Map<String, Object> getTesterdayDataForMonth() throws ParseException {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();
         LocalDateTime localDateTime = LocalDateTime.now().plusMonths(-1);
@@ -371,7 +371,9 @@ public class ZoneController {
             {
                 zones.get(i).settValue(nodeZoneTotalData.get(i+1).gettValue()-nodeZoneTotalData.get(i).gettValue());
             }
+
             zones.remove(zones.size()-1);
+
             if (isAmounr)
             {
                 ArrayList<ProAmount> proAmounts = new ArrayList<>();
@@ -382,7 +384,9 @@ public class ZoneController {
                 {
                     proAmounts.get(i).settValue(Math.max(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue(),0));
                 }
+
                 proAmounts.remove(proAmounts.size()-1);
+
                 if (isNoProductionSelect)
                 {
                     atomicInteger.set(0);
@@ -393,16 +397,27 @@ public class ZoneController {
                         switch (selectMode)
                         {
                             case "hours"->{
-                                zones.forEach(item->{
-                                    int dayOfMonth = item.gettTime().getDayOfMonth();
-                                    int hour = item.gettTime().getHour();
-                                    filterProAmountList.addAll(proAmounts.stream().filter(itemAmounts->{
-                                        int dayOfMonthForAmount = itemAmounts.gettTime().getDayOfMonth();
-                                        int dayOfMonthForAmountHour = itemAmounts.gettTime().getHour();
-                                        return dayOfMonth==dayOfMonthForAmount && hour==dayOfMonthForAmountHour;
-                                    }).collect(Collectors.toList()));
-                                });
-                            }
+                                    zones.forEach(item->{
+                                        int i = atomicInteger.get();
+                                        int dayOfMonth = item.gettTime().getDayOfMonth();
+                                        int hour = item.gettTime().getHour();
+                                        filterProAmountList.addAll(proAmounts.stream().filter(itemAmounts->{
+                                            int dayOfMonthForAmount = itemAmounts.gettTime().getDayOfMonth();
+                                            int dayOfMonthForAmountHour = itemAmounts.gettTime().getHour();
+                                            return dayOfMonth==dayOfMonthForAmount && hour==dayOfMonthForAmountHour;
+                                        }).collect(Collectors.toList()));
+                                        if (zones.size()>proAmounts.size())
+                                        {
+                                            if (filterProAmountList.size()!=i+1)
+                                            {
+                                                filterProAmountList.add(new ProAmount(5,-1,item.gettTime()));
+                                            }
+                                        }
+                                        atomicInteger.getAndIncrement();
+                                    });
+                                    atomicInteger.set(0);
+                                }
+
                             case "days"->{
                                 zones.forEach(item->{
                                     int monthValue = item.gettTime().getMonthValue();
@@ -425,10 +440,18 @@ public class ZoneController {
                     {
                         finallFilterProAmountList.addAll(filterProAmountList);
                     }
+                    atomicInteger.set(0);
                     List<Zone> collect = zones.stream().filter(zoneItem -> {
                         int i = atomicInteger.get();
                         atomicInteger.getAndIncrement();
-                        return finallFilterProAmountList.get(i).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                        if (finallFilterProAmountList.get(i).gettValue()>=0)
+                        {
+                            return finallFilterProAmountList.get(i).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                        }
+                        else
+                        {
+                            return zoneItem.gettValue() <= nonProductionValueLimit;
+                        }
                     }).collect(Collectors.toList());
                     IntSummaryStatistics collectOfTotal = zones.stream().collect(Collectors.summarizingInt(Zone::gettValue));
                     outPutHashmap.put("main",collect);
@@ -654,7 +677,7 @@ public class ZoneController {
                 {
                     finallProAmounts.get(g).settValue(Math.max(proAmountListForDay.get(g + 1).gettValue() - proAmountListForDay.get(g).gettValue(), 0));
                 }
-                finallProAmounts.remove(finallProAmounts.size()-1);
+                    finallProAmounts.remove(finallProAmounts.size()-1);
             }
             else
             {
@@ -669,7 +692,7 @@ public class ZoneController {
                 {
                     finallTotalZoneData.get(c).settValue(totalZoneData.get(c+1).gettValue()-totalZoneData.get(c).gettValue());
                 }
-                finallTotalZoneData.remove(finallTotalZoneData.size()-1);
+                    finallTotalZoneData.remove(finallTotalZoneData.size()-1);
             }
             else
             {
@@ -679,7 +702,9 @@ public class ZoneController {
 
             if (finallTotalZoneData.size()!=finallProAmounts.size()&&finallTotalZoneData.size()!=0&&finallProAmounts.size()!=0)
             {
+                atomicInteger.set(0);
                 finallTotalZoneData.forEach(item->{
+                    int i = atomicInteger.get();
                     int hoursValue = item.gettTime().getHour();
                     int dayOfMonth = item.gettTime().getDayOfMonth();
                     int monthValue = item.gettTime().getMonthValue();
@@ -689,10 +714,15 @@ public class ZoneController {
                         int monthValueForAmount = itemAmounts.gettTime().getMonthValue();
                         return monthValue==monthValueForAmount && dayOfMonth==dayOfMonthForAmountHour && hoursValue==hoursValueForAmount;
                     }).collect(Collectors.toList()));
+                    if (finallTotalZoneData.size()>finallProAmounts.size())
+                    {
+                        if (filterProAmountList.size()!=i+1)
+                        {
+                            filterProAmountList.add(new ProAmount(5,-1,item.gettTime()));
+                        }
+                    }
+                    atomicInteger.getAndIncrement();
                 });
-
-
-
             }
             if (filterProAmountList.size()==0)
             {
@@ -704,17 +734,26 @@ public class ZoneController {
             }
 
             List<Zone> collect=null;
+            atomicInteger.set(0);
             if (finallTotalZoneData.size()==finallFilterProAmountList.size())
             {
                 collect = finallTotalZoneData.stream().filter(zoneItem -> {
                     int index = atomicInteger.get();
-
                     atomicInteger.getAndIncrement();
-                    return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                    if (finallFilterProAmountList.get(index).gettValue()>=0)
+                    {
+                        return finallFilterProAmountList.get(index).gettValue() == 0 && zoneItem.gettValue() <= nonProductionValueLimit;
+                    }
+                    else
+                    {
+                        return zoneItem.gettValue() <= nonProductionValueLimit;
+                    }
+
                 }).collect(Collectors.toList());
             }
             else
             {
+                //逻辑已经更改两者长度一定会相等,永远都不会走到这里
                 collect = finallTotalZoneData.stream().filter(zoneItem -> {
                     int index = atomicInteger.get();
                     if (index<=finallFilterProAmountList.size()-1)
@@ -742,7 +781,7 @@ public class ZoneController {
                     }
                 }).collect(Collectors.toList());
             }
-            for (int i=0;i<diffDay;i++)
+            for (int i=0;i<=diffDay;i++)
             {
                 int monthValue = startTime.getMonthValue();
                 int dayOfMonth = startTime.getDayOfMonth();

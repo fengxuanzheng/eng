@@ -430,7 +430,9 @@ public class ZoneServer {
             {
                 proAmounts.get(i).settValue(proAmountList.get(i+1).gettValue()-proAmountList.get(i).gettValue());
             }
+
             proAmounts.remove(proAmounts.size()-1);
+
             sendData.put("ha",proAmounts);
         }
         else
@@ -526,7 +528,9 @@ public class ZoneServer {
             {
                 zones.get(i).settValue(selectData.get(i+1).gettValue()-selectData.get(i).gettValue());
             }
+
             zones.remove(zones.size()-1);
+
             sendData.put("main",zones);
         }
         else

@@ -7,10 +7,10 @@
  <defaultCache
    maxElementsInMemory="100"
    maxElementsOnDisk="0"
-   eternal="true"
+   eternal="false"
    overflowToDisk="true" 
-   timeToIdleSeconds="0"
-   timeToLiveSeconds="0"
+   timeToIdleSeconds="500"
+   timeToLiveSeconds="500"
    diskPersistent="true"
    diskExpiryThreadIntervalSeconds="120"
    memoryStoreEvictionPolicy="LRU">

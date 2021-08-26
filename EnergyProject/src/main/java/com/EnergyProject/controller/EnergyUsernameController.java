@@ -5,6 +5,7 @@ import com.EnergyProject.pojo.EnergyUsername;
 import com.EnergyProject.server.ENERGYUSERNAMEService;
 import com.EnergyProject.utils.Md5Util;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.gson.Gson;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -46,13 +47,18 @@ public class EnergyUsernameController {
         try {
             if (!currentUser.isAuthenticated()) {
                 UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(stringObjectMap.get("username"), stringObjectMap.get("password"));
-                usernamePasswordToken.setRememberMe(true);
+               // usernamePasswordToken.setRememberMe(true);
                 currentUser.login(usernamePasswordToken);
             }
 
         } catch (AuthenticationException e) {
+            HashMap<String, Object> writeToData = new HashMap<>();
+            writeToData.put("message","登入失败,请检查认证信息");
+            Gson gson = new Gson();
+            String writeToDataString = gson.toJson(writeToData);
+            httpServletResponse.setContentType("text/html;charset=UTF-8");
             PrintWriter writer = httpServletResponse.getWriter();
-            writer.write("登入失败,请检查认证信息");
+            writer.write(writeToDataString);
             writer.flush();
             writer.close();
             return null;
@@ -75,11 +81,18 @@ public class EnergyUsernameController {
     }
 
     @GetMapping("/getLoginUser")
-    public EnergyUsername getLoginUser()
+    public Map<String, Object> getLoginUser()
     {
         Subject subject = SecurityUtils.getSubject();
-
-        return (EnergyUsername) subject.getPrincipal();
+        EnergyUsername principal = (EnergyUsername) subject.getPrincipal();
+        HashMap<String, Object> sendToPrincipal = new HashMap<>();
+        sendToPrincipal.put("username",principal.getUsername());
+        sendToPrincipal.put("userPhoto",principal.getUserPhoto());
+        sendToPrincipal.put("status",principal.getStatus());
+        sendToPrincipal.put("workId",principal.getWorkId());
+        sendToPrincipal.put("area",principal.getArea());
+        sendToPrincipal.put("station",principal.getStation());
+        return sendToPrincipal;
     }
 
     @GetMapping("/getAllEnergyUsernameData")

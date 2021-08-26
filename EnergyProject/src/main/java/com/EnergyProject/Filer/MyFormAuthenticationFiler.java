@@ -38,7 +38,8 @@ public class MyFormAuthenticationFiler extends FormAuthenticationFilter {
         HttpServletResponse response1 = (HttpServletResponse) response;
         response1.setHeader("Content-Type","application/json;charset=UTF-8");
         response1.setHeader("Access-Control-Allow-Credentials","true");
-        response1.setHeader("Access-Control-Allow-Origin","http://10.228.1.230");
+        //response1.setHeader("Access-Control-Allow-Origin","http://10.228.1.230");
+        response1.setHeader("Access-Control-Allow-Origin","http://localhost:8080");
         RequestInformation requestInformation = new RequestInformation();
         Map<String, Object> stringObjectMap = requestInformation.getStringObjectMap();
         stringObjectMap.put("message","用户未登入");

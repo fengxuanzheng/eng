@@ -20,8 +20,8 @@
     <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
         <property name="cacheManager" ref="cacheManager"/>
         <property name="authenticator" ref="authenticator"/>
-       <!-- <property name="sessionManager" ref="sessionManager"/>
-        <property name="rememberMeManager" ref="rememberMeManager"/>-->
+       <!-- <property name="sessionManager" ref="sessionManager"/>-->
+        <property name="rememberMeManager" ref="rememberMeManager"/>
         <property name="realms">
             <list>
                 <!--<ref bean="jdbcRealm"/>
@@ -176,6 +176,7 @@
                 /isusername=anon
                 /logout=logout
                 /energyUsername/loginEnergy=anon
+                /energyUsername/getRememberMeStatus=anon
                 /**=authc
             </value>
         </property><!--被通过实例工厂给属性filterChainDefinitions赋值代替-->

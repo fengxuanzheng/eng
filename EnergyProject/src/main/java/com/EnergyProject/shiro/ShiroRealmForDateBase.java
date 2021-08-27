@@ -19,6 +19,8 @@ import java.util.List;
 public class ShiroRealmForDateBase extends AuthorizingRealm {
     @Autowired
     private ENERGYUSERNAMEService energyusernameService;
+
+    public static String usernameOriginPassword;
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         Object primaryPrincipal = principals.getPrimaryPrincipal();
@@ -51,15 +53,23 @@ public class ShiroRealmForDateBase extends AuthorizingRealm {
         String username = usernamePasswordToken.getUsername();
         Object credentials = usernamePasswordToken.getCredentials();
         String password=new String((char[])credentials);
+        usernameOriginPassword=password;
         EnergyUsername energyUsername = energyusernameService.selectUsernameByUser(username);
+        String usernamaPassword = energyUsername.getPassword();
         if(energyUsername==null)
         {
             throw  new AuthenticationException("登入失败");
         }
         String getsalt = energyUsername.getSalt();
         ByteSource bytes = ByteSource.Util.bytes(getsalt);
+        energyUsername.setPassword("");
+        energyUsername.setSalt("");
+        energyUsername.setCreateTime(null);
+        energyUsername.setUserId(null);
+        energyUsername.setUpdateTime(null);
+        energyUsername.setMobile(null);
 
-        SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(energyUsername, energyUsername.getPassword(),bytes, getName());
+        SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(energyUsername, usernamaPassword,bytes, getName());
         return simpleAuthenticationInfo;
     }
 }

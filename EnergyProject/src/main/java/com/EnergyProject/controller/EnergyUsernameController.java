@@ -1,6 +1,7 @@
 package com.EnergyProject.controller;
 
 
+import com.EnergyProject.Filer.MyFormAuthenticationFiler;
 import com.EnergyProject.pojo.EnergyUsername;
 import com.EnergyProject.server.ENERGYUSERNAMEService;
 import com.EnergyProject.utils.Md5Util;
@@ -38,18 +39,31 @@ public class EnergyUsernameController {
 
     @Autowired
     private ENERGYUSERNAMEService ENERGYUSERNAMEService;
+    public static Boolean isRememberMe=false;
 
 
     @PostMapping("/loginEnergy")
     public Boolean loginEnergyMananger(@RequestBody Map<String, String> stringObjectMap, HttpServletResponse httpServletResponse) throws IOException {
-        Subject currentUser = SecurityUtils.getSubject();
 
+        Subject currentUser = SecurityUtils.getSubject();
+        if (MyFormAuthenticationFiler.isRememberMeError)
+        {
+            isRememberMe=false;
+            MyFormAuthenticationFiler.isRememberMeError=false;
+        }
         try {
-            if (!currentUser.isAuthenticated()) {
-                UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(stringObjectMap.get("username"), stringObjectMap.get("password"));
-               // usernamePasswordToken.setRememberMe(true);
-                currentUser.login(usernamePasswordToken);
+
+            if (isRememberMe)
+            {
+                return true;
             }
+                if (!currentUser.isAuthenticated()) {
+                    UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(stringObjectMap.get("username"), stringObjectMap.get("password"));
+                    usernamePasswordToken.setRememberMe(Boolean.parseBoolean(stringObjectMap.get("isRememberMe")));
+                    currentUser.login(usernamePasswordToken);
+                    isRememberMe=Boolean.parseBoolean(stringObjectMap.get("isRememberMe"));
+                }
+
 
         } catch (AuthenticationException e) {
             HashMap<String, Object> writeToData = new HashMap<>();
@@ -65,6 +79,12 @@ public class EnergyUsernameController {
         }
 
         return true;
+    }
+
+    @GetMapping("/getRememberMeStatus")
+    public Boolean getRememberMeStatus()
+    {
+        return isRememberMe;
     }
 
     @PostMapping("/rejectEnergyUser")

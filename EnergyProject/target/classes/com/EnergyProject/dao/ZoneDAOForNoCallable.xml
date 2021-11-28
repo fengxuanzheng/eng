@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.EnergyProject.dao.ZoneDAOForNoCallable">
+    <cache/>
+
+    <select id="sqlserverSelectAllLastZone" resultType="com.EnergyProject.pojo.Zone">
+        SELECT zone.eid,zone.t_time,zone.t_value FROM [zone] RIGHT JOIN (SELECT eid, MAX(t_time) as lasttime FROM [zone] GROUP BY eid ) as lastzone on zone.eid=lastzone.eid
+            and [zone].t_time=lastzone.lasttime
+    </select>
+
+</mapper>

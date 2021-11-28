@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.EnergyProject.dao.ZoneDAO">
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+
+
+    <resultMap id="mapzone1" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone2" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone3" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone4" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone5" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone6" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone7" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone8" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone9" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone10" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone11" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <resultMap id="mapzone12" type="com.EnergyProject.pojo.Zone">
+        <result property="tValue" column="t_value"/>
+        <result property="tTime" column="t_time"/>
+        <result property="eid" column="eid"/>
+    </resultMap>
+    <select id="getzonelist" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+       /* {
+            call finallgetvaluediffonSSE(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{sizes,mode=IN,jdbcType=INTEGER},
+                #{nulltime,mode=OUT,jdbcType=TIMESTAMP}
+            )
+        }*/
+    </select>
+
+    <select id="getzonelistForDay" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+       /* {
+            call finallgetvaluediffForDAYonSSE(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{sizes,mode=IN,jdbcType=INTEGER},
+                #{nulltime,mode=OUT,jdbcType=TIMESTAMP}
+            )
+            }*/
+    </select>
+
+    <select id="getzonelistForMinuteForManger" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+      /*  {
+            call finallgetvaluediffForMinuteonManger(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP},
+                #{nulltime,mode=OUT,jdbcType=TIMESTAMP}
+            )
+            }*/
+    </select>
+    <select id="getzonelistForManger" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+        /*{
+            call finallgetvaluediffonManger(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP},
+                #{nulltime,mode=OUT,jdbcType=TIMESTAMP}
+            )
+            }*/
+    </select>
+    <select id="getzonelistForDayForManger" statementType="CALLABLE"  resultMap="mapzone1,mapzone2,mapzone3,mapzone4,mapzone5,mapzone6,mapzone7,mapzone8,mapzone9,mapzone10,mapzone11,mapzone12">
+        /*{
+            call finallgetvaluediffForDAYonManger(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP},
+                #{nulltime,mode=OUT,jdbcType=TIMESTAMP}
+            )
+            }*/
+    </select>
+
+
+    <select id="sqlservertransfer" resultType="com.EnergyProject.pojo.Zone">
+        select TOP 1 eid,t_time,t_value from zone WHERE eid=#{eid} order by t_time DESC
+    </select>
+
+
+    <select id="sqlserverSelectAllLastZone" resultType="com.EnergyProject.pojo.Zone">
+        SELECT zone.eid,zone.t_time,zone.t_value FROM [zone] RIGHT JOIN (SELECT eid, MAX(t_time) as lasttime FROM [zone] GROUP BY eid ) as lastzone on zone.eid=lastzone.eid
+            and [zone].t_time=lastzone.lasttime
+    </select>
+    <select id="selectSingleZone" resultType="com.EnergyProject.pojo.Zone">
+        select TOP 1 eid,t_time,t_value from zone where eid=#{eid} order by t_time DESC
+    </select>
+    <select id="getzonelistForCUROS" statementType="CALLABLE"  resultMap="mapzone1">
+        {call finallgetvaluediffonCUROS (
+            #{starttime,mode=IN,jdbcType=TIMESTAMP},
+            #{addtime,mode=IN,jdbcType=INTEGER},
+             #{eid,mode=IN,jdbcType=INTEGER},
+            #{endTime,mode=IN,jdbcType=TIMESTAMP}
+            )
+            }
+    </select>
+
+    <select id="getzonelistForCUROSForDay" statementType="CALLABLE"  resultMap="mapzone1">
+        {
+         call finallgetvaluediffonCUROSFORDAY(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{eid,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP}
+            )
+        }
+    </select>
+    <select id="selectTotalZone" resultType="com.EnergyProject.pojo.Zone">
+        select Top 2 eid,t_time,t_value from zone where eid in(26,27) order by t_time desc
+    </select>
+    <select id="getzonelistForCUROSOfTotal" statementType="CALLABLE"  resultMap="mapzone1">
+        {
+            call finallgetvaluediffonCUROSOfTotal(
+                #{starttime,mode=IN,jdbcType=TIMESTAMP},
+                #{addtime,mode=IN,jdbcType=INTEGER},
+                #{endTime,mode=IN,jdbcType=TIMESTAMP}
+            )
+            }
+    </select>
+
+</mapper>

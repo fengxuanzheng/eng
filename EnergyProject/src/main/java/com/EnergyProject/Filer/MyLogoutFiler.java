@@ -27,8 +27,8 @@ public class MyLogoutFiler extends LogoutFilter {
         Subject subject = getSubject(request, response);
         HttpServletResponse httpServletResponse=(HttpServletResponse)response;
         httpServletResponse.setHeader("Access-Control-Allow-Credentials","true");
-        httpServletResponse.setHeader("Access-Control-Allow-Origin","http://10.228.1.230");
-        //httpServletResponse.setHeader("Access-Control-Allow-Origin","http://localhost:8080");
+        //httpServletResponse.setHeader("Access-Control-Allow-Origin","http://10.228.1.230");
+        httpServletResponse.setHeader("Access-Control-Allow-Origin","http://localhost:8080");
         httpServletResponse.setHeader("Content-Type","application/json;charset=UTF-8");
         // Check if POST only logout is enabled
         if (isPostOnlyLogout()) {

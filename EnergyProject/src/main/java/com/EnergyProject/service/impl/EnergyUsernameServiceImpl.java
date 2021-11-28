@@ -53,4 +53,10 @@ public class EnergyUsernameServiceImpl extends ServiceImpl<EnergyUsernameMapper,
     public Integer delectEnergyUsername(Integer id) {
         return energyUsernameMapper.deleteById(id);
     }
+
+    @Override
+    public Boolean checkIsUser(String username) {
+        List<EnergyUsername> username1 = energyUsernameMapper.selectList(new QueryWrapper<EnergyUsername>().eq("username", username));
+        return username1.isEmpty();
+    }
 }

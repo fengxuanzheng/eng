@@ -6,6 +6,7 @@ import com.EnergyProject.pojo.ProAmount;
 import com.EnergyProject.server.APPLYREPORTervice;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,7 +38,7 @@ public class ApplyReportController {
     private Map<String,Object>outPutAllApplyReport=new HashMap<>();
 
     @PostMapping("/insterApplyReport")
-    @RequiresRoles(value = {"管理员","普通"})
+    @RequiresRoles(value = {"管理员","普通"},logical = Logical.OR )
     public Boolean insterApplyReport(@RequestBody(required = false)ApplyReport applyReport)
     {
         Integer integer = applyreporTervice.insterApplyReport(applyReport);
@@ -151,7 +152,7 @@ public class ApplyReportController {
     }
 
     @GetMapping("/getRejectModeData")
-    @RequiresRoles(value = {"管理员","普通"})
+    @RequiresRoles(value = {"管理员","普通"},logical = Logical.OR)
     public Map<String,Object> getRejectModeData(@RequestParam(value = "page",defaultValue = "1") Integer page,@RequestParam(value = "size",defaultValue = "10") Integer size)
     {
         HashMap<String, Object> stringObjectHashMap = new HashMap<>();

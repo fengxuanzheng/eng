@@ -1,5 +1,7 @@
 package publiceTest;
 
+import org.junit.jupiter.api.Test;
+
 public class AtomicIntegerTest {
     private static final int THREADS_CONUT = 20;
     public static int count = 0;
@@ -26,5 +28,13 @@ public class AtomicIntegerTest {
             Thread.yield();
         }
         System.out.println(count);
+    }
+
+    @Test
+    public void test3()
+    {
+        byte[] bytes = {80};
+        String s = new String(bytes);
+        System.out.println(s);
     }
 }

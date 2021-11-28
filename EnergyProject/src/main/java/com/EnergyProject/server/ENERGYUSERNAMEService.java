@@ -23,4 +23,5 @@ public interface ENERGYUSERNAMEService extends IService<EnergyUsername> {
     public Integer updataStatus(Integer id,String status);
     public Integer delectEnergyUsername(Integer id);
 
+    Boolean checkIsUser(String username);
 }

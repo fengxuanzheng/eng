@@ -141,5 +141,11 @@ public class EnergyUsernameController {
         return integer!=null;
     }
 
+    @GetMapping("/checkIsRejectUser")
+    public Boolean checkIsRejectUser(@RequestParam(value = "username",defaultValue = "") String username)
+    {
+       return ENERGYUSERNAMEService.checkIsUser(username);
+    }
+
 }
 

@@ -177,6 +177,7 @@
                 /logout=logout
                 /energyUsername/loginEnergy=anon
                 /energyUsername/getRememberMeStatus=anon
+                /energyUsername/checkIsRejectUser=anon
                 /**=authc
             </value>
         </property><!--被通过实例工厂给属性filterChainDefinitions赋值代替-->
